@@ -46,6 +46,11 @@ export class Product extends Model<Product, ProductsCreationAttrs> {
   })
   price: number;
 
+  @Column({ type: DataType.JSONB })
+  characteristics: {
+    [key: string]: string | number | boolean;
+  };
+
   @ForeignKey(() => Category)
   @Column({ type: DataType.INTEGER })
   categoryId: number;

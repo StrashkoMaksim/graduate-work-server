@@ -1,5 +1,6 @@
 import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
 import { Product } from '../products/products.model';
+import { CategoryCharacteristics } from './category-characteristics.interface';
 
 interface CategoryCreationAttrs {
   slug: string;
@@ -26,6 +27,11 @@ export class Category extends Model<Category, CategoryCreationAttrs> {
     type: DataType.STRING,
   })
   name: string;
+
+  @Column({
+    type: DataType.JSONB,
+  })
+  characteristics: CategoryCharacteristics;
 
   @HasMany(() => Product)
   products: Product[];

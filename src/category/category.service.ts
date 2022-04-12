@@ -22,6 +22,8 @@ export class CategoryService {
     let slugCounter = 1;
     let slugStr = slug(dto.name);
 
+    console.log(dto.characteristics);
+
     while (!availableSlug) {
       const duplicatedCategoryBySlug = await this.getCategoryBySlug(slugStr);
 
