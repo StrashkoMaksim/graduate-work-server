@@ -20,6 +20,10 @@ export function ValidateCategoryCharacteristics(
         validate(object: any, args: ValidationArguments) {
           args.value;
 
+          if (object === undefined) {
+            return false;
+          }
+
           for (const field of Object.entries(object)) {
             const isGoodValue =
               field[1] === CategoryCharacteristicsType.String ||

@@ -22,8 +22,6 @@ export class CategoryService {
     let slugCounter = 1;
     let slugStr = slug(dto.name);
 
-    console.log(dto.characteristics);
-
     while (!availableSlug) {
       const duplicatedCategoryBySlug = await this.getCategoryBySlug(slugStr);
 
@@ -40,6 +38,10 @@ export class CategoryService {
       slug: slugStr,
     });
     return category;
+  }
+
+  async getCategoryById(id: number) {
+    return await this.categoryRepository.findByPk(id);
   }
 
   async getCategoryBySlug(slug: string) {

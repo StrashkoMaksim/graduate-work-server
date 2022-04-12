@@ -13,6 +13,12 @@ interface ProductsCreationAttrs {
   name: string;
   price: number;
   categoryId: number;
+  characteristics: ProductCharacteristic;
+  previewImage: string;
+}
+
+export interface ProductCharacteristic {
+  [key: string]: string | number | boolean;
 }
 
 @Table({ tableName: 'products' })
@@ -47,9 +53,7 @@ export class Product extends Model<Product, ProductsCreationAttrs> {
   price: number;
 
   @Column({ type: DataType.JSONB })
-  characteristics: {
-    [key: string]: string | number | boolean;
-  };
+  characteristics: ProductCharacteristic;
 
   @ForeignKey(() => Category)
   @Column({ type: DataType.INTEGER })

@@ -1,5 +1,5 @@
 export interface CategoryCharacteristics {
-  [key: string]: CategoryCharacteristics;
+  [key: string]: CategoryCharacteristicsType;
 }
 
 export enum CategoryCharacteristicsType {
