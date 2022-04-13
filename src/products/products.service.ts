@@ -56,6 +56,9 @@ export class ProductsService {
       characteristics,
       previewImage,
     });
+
+
+
     return product;
   }
 

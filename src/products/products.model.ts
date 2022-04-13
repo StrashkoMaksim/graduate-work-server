@@ -15,10 +15,21 @@ interface ProductsCreationAttrs {
   categoryId: number;
   characteristics: ProductCharacteristic;
   previewImage: string;
+  gallery: ProductGallery;
 }
 
 export interface ProductCharacteristic {
   [key: string]: string | number | boolean;
+}
+
+export interface ProductGallery {
+  videos: string[];
+  images: [
+    {
+      preview: string;
+      img: string;
+    },
+  ];
 }
 
 @Table({ tableName: 'products' })
@@ -46,6 +57,16 @@ export class Product extends Model<Product, ProductsCreationAttrs> {
     type: DataType.STRING,
   })
   previewImage: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  videos: string;
+
+  @Column({
+    type: DataType.JSONB,
+  })
+  gallery: ProductGallery;
 
   @Column({
     type: DataType.DOUBLE,
