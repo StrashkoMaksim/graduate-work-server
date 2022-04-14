@@ -5,21 +5,20 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { Category } from '../category/category.model';
 import { Product } from './products.model';
 import { CategoryModule } from '../category/category.module';
-import { NestjsFormDataModule } from 'nestjs-form-data';
-import { MyFormDataConfigModule } from '../form-data/my-form-data-config.module';
-import { MyFormDataConfigService } from '../form-data/my-form-data-config.service';
 import { FilesModule } from '../files/files.module';
+import { TransactionInterceptor } from '../transaction/transaction.interceptor';
+import { Sequelize } from 'sequelize-typescript';
 
 @Module({
   controllers: [ProductsController],
-  providers: [ProductsService],
+  providers: [
+    ProductsService,
+    TransactionInterceptor,
+    { provide: 'SEQUELIZE', useExisting: Sequelize },
+  ],
   imports: [
     SequelizeModule.forFeature([Category, Product]),
     CategoryModule,
-    NestjsFormDataModule.configAsync({
-      imports: [MyFormDataConfigModule],
-      useExisting: MyFormDataConfigService,
-    }),
     FilesModule,
   ],
 })

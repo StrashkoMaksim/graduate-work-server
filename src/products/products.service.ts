@@ -6,6 +6,7 @@ import * as slug from 'slug';
 import { CategoryService } from '../category/category.service';
 import { CategoryCharacteristicsType } from '../category/category-characteristics.interface';
 import { FilesService } from '../files/files.service';
+import { Transaction } from 'sequelize';
 
 @Injectable()
 export class ProductsService {
@@ -19,7 +20,7 @@ export class ProductsService {
     return await this.productsRepository.findAll();
   }
 
-  async createProducts(dto: CreateProductDto) {
+  async createProducts(dto: CreateProductDto, transaction: Transaction) {
     const category = await this.categoryService.getCategoryById(dto.categoryId);
 
     if (!category) {
@@ -31,33 +32,39 @@ export class ProductsService {
       category,
     );
 
-    let availableSlug = false;
-    let slugCounter = 1;
-    let slugStr = slug(dto.name);
+    const previewEntity = await this.filesService.getFileById(dto.previewImage);
+    const previewImage = await this.filesService.saveImg(
+      previewEntity.getDataValue('filename'),
+      400,
+    );
 
-    while (!availableSlug) {
-      const duplicatedCategoryBySlug = await this.getProductBySlug(slugStr);
+    const bigImages: string[] = [];
+    const mediumImages: string[] = [];
+    const smallImages: string[] = [];
 
-      if (!duplicatedCategoryBySlug) {
-        availableSlug = true;
-      } else {
-        slugStr = slug(`${dto.name}-${slugCounter}`);
-        slugCounter++;
-      }
+    for (const imageId of dto.images) {
+      const image = await this.filesService.getFileById(imageId);
+
+      bigImages.push(await this.filesService.saveImg(image.filename, 1920));
+      mediumImages.push(await this.filesService.saveImg(image.filename, 700));
+      smallImages.push(
+        await this.filesService.saveImg(image.filename, null, 60),
+      );
     }
 
-    const previewImage = await this.filesService.saveImg(dto.images[0], 300);
+    const slugStr = await this.generateSlug(dto.name);
 
-    const product = await this.productsRepository.create({
-      name: dto.name,
-      price: dto.price,
-      slug: slugStr,
-      categoryId: dto.categoryId,
-      characteristics,
-      previewImage,
-    });
-
-
+    const product = await this.productsRepository.create(
+      {
+        name: dto.name,
+        price: dto.price,
+        slug: slugStr,
+        categoryId: dto.categoryId,
+        characteristics,
+        previewImage,
+      },
+      { transaction },
+    );
 
     return product;
   }
@@ -116,5 +123,23 @@ export class ProductsService {
       resultCharacteristics[field[0]] = value;
     }
     return resultCharacteristics;
+  }
+
+  private async generateSlug(str) {
+    let availableSlug = false;
+    let slugCounter = 1;
+    let slugStr = slug(str);
+
+    while (!availableSlug) {
+      const duplicatedCategoryBySlug = await this.getProductBySlug(slugStr);
+
+      if (!duplicatedCategoryBySlug) {
+        availableSlug = true;
+      } else {
+        slugStr = slug(`${str}-${slugCounter}`);
+        slugCounter++;
+      }
+    }
+    return slugStr;
   }
 }

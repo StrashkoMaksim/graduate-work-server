@@ -9,8 +9,9 @@ import {
 import { Product } from '../products.model';
 
 interface ProductsImagesCreationAttrs {
-  preview: string;
-  image: string;
+  bigImage: string;
+  mediumImage: string;
+  smallImage: string;
   productId: number;
 }
 
@@ -31,12 +32,17 @@ export class ProductImage extends Model<
     type: DataType.STRING,
     unique: true,
   })
-  preview: string;
+  smallImage: string;
 
   @Column({
     type: DataType.STRING,
   })
-  image: string;
+  mediumImage: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  bigImage: string;
 
   @ForeignKey(() => Product)
   @Column({ type: DataType.INTEGER })

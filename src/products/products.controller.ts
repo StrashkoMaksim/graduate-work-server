@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, Post, UseInterceptors } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product-dto';
-import { FormDataRequest } from 'nestjs-form-data';
+import { TransactionInterceptor } from '../transaction/transaction.interceptor';
+import { TransactionParam } from '../transaction/transaction-param.decorator';
+import { Transaction } from 'sequelize';
 
 @Controller('products')
 export class ProductsController {
@@ -12,10 +14,12 @@ export class ProductsController {
     return this.productsService.getProducts();
   }
 
-  @FormDataRequest()
+  @UseInterceptors(TransactionInterceptor)
   @Post()
-  createCategory(@Body() dto: CreateProductDto) {
-    console.log(dto)
-    return this.productsService.createProducts(dto);
+  createCategory(
+    @Body() dto: CreateProductDto,
+    @TransactionParam() transaction: Transaction,
+  ) {
+    return this.productsService.createProducts(dto, transaction);
   }
 }
