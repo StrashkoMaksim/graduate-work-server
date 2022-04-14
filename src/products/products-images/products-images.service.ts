@@ -2,7 +2,6 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { ProductImage } from './products-images.model';
 import { FilesService } from '../../files/files.service';
-import { FileSystemStoredFile } from 'nestjs-form-data';
 import { Sequelize } from 'sequelize-typescript';
 import { Transaction } from 'sequelize';
 
@@ -20,7 +19,7 @@ export class ProductsImagesService {
 
   async createImages(
     productId: number,
-    imagesArray: FileSystemStoredFile[],
+    imagesArray: number[],
     transaction: Transaction,
   ) {
     const productImagesResult: ProductImage[] = [];
