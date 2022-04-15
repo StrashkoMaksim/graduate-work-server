@@ -1,24 +1,24 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { ProductImage } from './products-images.model';
+import { ProductExample } from './products-examples.model';
 import { FilesService } from '../../files/files.service';
 import { Transaction } from 'sequelize';
 
 @Injectable()
-export class ProductsImagesService {
+export class ProductsExamplesService {
   constructor(
-    @InjectModel(ProductImage) private imagesRepository: typeof ProductImage,
+    @InjectModel(ProductExample)
+    private examplesRepository: typeof ProductExample,
     private filesService: FilesService,
   ) {}
 
-  async createImages(
+  async createExamples(
     productId: number,
     imagesArray: number[],
     transaction: Transaction,
-  ): Promise<ProductImage[]> {
-    const productImagesResult: ProductImage[] = [];
+  ): Promise<ProductExample[]> {
+    const productExamplesResult: ProductExample[] = [];
     const bigImages: string[] = [];
-    const mediumImages: string[] = [];
     const smallImages: string[] = [];
 
     try {
@@ -26,17 +26,13 @@ export class ProductsImagesService {
         const image = await this.filesService.getFileById(imagesArray[i]);
 
         bigImages.push(await this.filesService.saveImg(image.filename, 1920));
-        mediumImages.push(await this.filesService.saveImg(image.filename, 700));
-        smallImages.push(
-          await this.filesService.saveImg(image.filename, null, 60),
-        );
+        smallImages.push(await this.filesService.saveImg(image.filename, 150));
 
-        productImagesResult.push(
-          await this.imagesRepository.create(
+        productExamplesResult.push(
+          await this.examplesRepository.create(
             {
               productId,
               bigImage: bigImages[i],
-              mediumImage: mediumImages[i],
               smallImage: smallImages[i],
             },
             { transaction },
@@ -50,9 +46,6 @@ export class ProductsImagesService {
       bigImages.forEach((image) => {
         this.filesService.deleteFile(image);
       });
-      mediumImages.forEach((image) => {
-        this.filesService.deleteFile(image);
-      });
       smallImages.forEach((image) => {
         this.filesService.deleteFile(image);
       });
@@ -60,6 +53,6 @@ export class ProductsImagesService {
       throw new InternalServerErrorException('Непредвиденная ошибка сервера');
     }
 
-    return productImagesResult;
+    return productExamplesResult;
   }
 }

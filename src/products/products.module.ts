@@ -8,6 +8,8 @@ import { CategoryModule } from '../category/category.module';
 import { FilesModule } from '../files/files.module';
 import { TransactionInterceptor } from '../transaction/transaction.interceptor';
 import { Sequelize } from 'sequelize-typescript';
+import { ProductsImagesModule } from './products-images/products-images.module';
+import { ProductsExamplesModule } from './products-examples/products-examples.module';
 
 @Module({
   controllers: [ProductsController],
@@ -20,6 +22,8 @@ import { Sequelize } from 'sequelize-typescript';
     SequelizeModule.forFeature([Category, Product]),
     CategoryModule,
     FilesModule,
+    ProductsImagesModule,
+    ProductsExamplesModule,
   ],
 })
 export class ProductsModule {}

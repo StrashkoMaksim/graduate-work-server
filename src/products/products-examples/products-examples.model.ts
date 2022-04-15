@@ -8,17 +8,16 @@ import {
 } from 'sequelize-typescript';
 import { Product } from '../products.model';
 
-interface ProductsImagesCreationAttrs {
+interface ProductsExamplesCreationAttrs {
   bigImage: string;
-  mediumImage: string;
   smallImage: string;
   productId: number;
 }
 
-@Table({ tableName: 'products_images' })
-export class ProductImage extends Model<
-  ProductImage,
-  ProductsImagesCreationAttrs
+@Table({ tableName: 'products_examples' })
+export class ProductExample extends Model<
+  ProductExample,
+  ProductsExamplesCreationAttrs
 > {
   @Column({
     type: DataType.INTEGER,
@@ -33,12 +32,6 @@ export class ProductImage extends Model<
     allowNull: false,
   })
   smallImage: string;
-
-  @Column({
-    type: DataType.STRING,
-    allowNull: false,
-  })
-  mediumImage: string;
 
   @Column({
     type: DataType.STRING,

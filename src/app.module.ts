@@ -14,6 +14,8 @@ import { CategoryModule } from './category/category.module';
 import * as path from 'path';
 import { Product } from './products/products.model';
 import { Category } from './category/category.model';
+import { ProductImage } from './products/products-images/products-images.model';
+import { ProductExample } from './products/products-examples/products-examples.model';
 
 @Module({
   imports: [
@@ -27,7 +29,7 @@ import { Category } from './category/category.model';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      models: [User, Role, UserRoles, Product, Category],
+      models: [User, Role, UserRoles, Product, Category, ProductImage, ProductExample],
       autoLoadModels: true,
     }),
     ServeStaticModule.forRoot({

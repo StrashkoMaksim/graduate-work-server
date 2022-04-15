@@ -3,10 +3,13 @@ import {
   Column,
   DataType,
   ForeignKey,
+  HasMany,
   Model,
   Table,
 } from 'sequelize-typescript';
 import { Category } from '../category/category.model';
+import { ProductImage } from './products-images/products-images.model';
+import { ProductExample } from './products-examples/products-examples.model';
 
 interface ProductsCreationAttrs {
   slug: string;
@@ -15,21 +18,10 @@ interface ProductsCreationAttrs {
   categoryId: number;
   characteristics: ProductCharacteristic;
   previewImage: string;
-  gallery: ProductGallery;
 }
 
 export interface ProductCharacteristic {
   [key: string]: string | number | boolean;
-}
-
-export interface ProductGallery {
-  videos: string[];
-  images: [
-    {
-      preview: string;
-      img: string;
-    },
-  ];
 }
 
 @Table({ tableName: 'products' })
@@ -63,10 +55,11 @@ export class Product extends Model<Product, ProductsCreationAttrs> {
   })
   videos: string;
 
-  @Column({
-    type: DataType.JSONB,
-  })
-  gallery: ProductGallery;
+  @HasMany(() => ProductImage)
+  images: ProductImage[];
+
+  @HasMany(() => ProductExample)
+  examples: ProductExample[];
 
   @Column({
     type: DataType.DOUBLE,

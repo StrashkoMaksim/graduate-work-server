@@ -44,7 +44,7 @@ export class FilesService {
     return await this.filesRepository.findByPk(id);
   }
 
-  private async deleteFile(path: string) {
+  async deleteFile(path: string) {
     fs.unlink(path, (e) => {
       if (e) console.log(e);
     });

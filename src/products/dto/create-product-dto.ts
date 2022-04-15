@@ -42,4 +42,9 @@ export class CreateProductDto {
   @IsArray({ message: 'ID изображений должны быть массивом' })
   @Validate(IsIntNumbers)
   images: number[];
+
+  @IsDefined({ message: 'Отсутствуют ID изображений' })
+  @IsArray({ message: 'ID изображений должны быть массивом' })
+  @Validate(IsIntNumbers)
+  examples: number[];
 }

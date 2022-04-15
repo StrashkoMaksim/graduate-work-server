@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateProductDto } from './dto/create-product-dto';
 import { Product, ProductCharacteristic } from './products.model';
@@ -7,6 +12,8 @@ import { CategoryService } from '../category/category.service';
 import { CategoryCharacteristicsType } from '../category/category-characteristics.interface';
 import { FilesService } from '../files/files.service';
 import { Transaction } from 'sequelize';
+import { ProductsImagesService } from './products-images/products-images.service';
+import { ProductsExamplesService } from './products-examples/products-examples.service';
 
 @Injectable()
 export class ProductsService {
@@ -14,6 +21,8 @@ export class ProductsService {
     @InjectModel(Product) private productsRepository: typeof Product,
     private categoryService: CategoryService,
     private filesService: FilesService,
+    private productImagesService: ProductsImagesService,
+    private productExamplesService: ProductsExamplesService,
   ) {}
 
   async getProducts() {
@@ -21,52 +30,85 @@ export class ProductsService {
   }
 
   async createProducts(dto: CreateProductDto, transaction: Transaction) {
-    const category = await this.categoryService.getCategoryById(dto.categoryId);
+    let previewImage = '';
 
-    if (!category) {
-      throw new BadRequestException('Выбранной категории не существует');
-    }
-
-    const characteristics = this.validateCharacteristics(
-      dto.characteristics,
-      category,
-    );
-
-    const previewEntity = await this.filesService.getFileById(dto.previewImage);
-    const previewImage = await this.filesService.saveImg(
-      previewEntity.getDataValue('filename'),
-      400,
-    );
-
-    const bigImages: string[] = [];
-    const mediumImages: string[] = [];
-    const smallImages: string[] = [];
-
-    for (const imageId of dto.images) {
-      const image = await this.filesService.getFileById(imageId);
-
-      bigImages.push(await this.filesService.saveImg(image.filename, 1920));
-      mediumImages.push(await this.filesService.saveImg(image.filename, 700));
-      smallImages.push(
-        await this.filesService.saveImg(image.filename, null, 60),
+    try {
+      const category = await this.categoryService.getCategoryById(
+        dto.categoryId,
       );
+
+      if (!category) {
+        throw new BadRequestException('Выбранной категории не существует');
+      }
+
+      // Валидация характеристик
+      const characteristics = this.validateCharacteristics(
+        dto.characteristics,
+        category,
+      );
+
+      // Сохранение изображения превью
+      const previewEntity = await this.filesService.getFileById(
+        dto.previewImage,
+      );
+      previewImage = await this.filesService.saveImg(
+        previewEntity.getDataValue('filename'),
+        400,
+      );
+
+      // Уникальное название для URL
+      const slugStr = await this.generateSlug(dto.name);
+
+      const product = await this.productsRepository.create(
+        {
+          name: dto.name,
+          price: dto.price,
+          slug: slugStr,
+          categoryId: dto.categoryId,
+          characteristics,
+          previewImage,
+        },
+        { transaction },
+      );
+
+      // Добавление изображений
+      const images = await this.productImagesService.createImages(
+        product.id,
+        dto.images,
+        transaction,
+      );
+      await product.$set(
+        'images',
+        images.map((el) => el.id),
+      );
+      product.images = images;
+
+      // Добавление примеров работ
+      const examples = await this.productExamplesService.createExamples(
+        product.id,
+        dto.examples,
+        transaction,
+      );
+      await product.$set(
+        'examples',
+        examples.map((el) => el.id),
+      );
+      product.examples = examples;
+
+      return product;
+    } catch (e) {
+      if (previewImage) {
+        this.filesService.deleteFile(previewImage);
+        if (e instanceof HttpException) {
+          throw e;
+        } else {
+          console.error(e);
+          throw new InternalServerErrorException(
+            'Непредвиденная ошибка сервера',
+          );
+        }
+      }
     }
-
-    const slugStr = await this.generateSlug(dto.name);
-
-    const product = await this.productsRepository.create(
-      {
-        name: dto.name,
-        price: dto.price,
-        slug: slugStr,
-        categoryId: dto.categoryId,
-        characteristics,
-        previewImage,
-      },
-      { transaction },
-    );
-
-    return product;
   }
 
   async getProductBySlug(slug: string) {

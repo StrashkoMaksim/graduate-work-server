@@ -3,15 +3,14 @@ import { ProductsImagesService } from './products-images.service';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ProductImage } from './products-images.model';
 import { FilesModule } from '../../files/files.module';
-import { ProductsModule } from '../products.module';
 import { Product } from '../products.model';
+import { ProductsModule } from '../products.module';
 
 @Module({
   controllers: [],
   providers: [ProductsImagesService],
   imports: [
-    SequelizeModule.forFeature([ProductImage, Product]),
-    ProductsModule,
+    SequelizeModule.forFeature([ProductImage]),
     FilesModule,
   ],
   exports: [ProductsImagesService],
