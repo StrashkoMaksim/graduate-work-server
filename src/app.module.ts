@@ -16,6 +16,7 @@ import { Product } from './products/products.model';
 import { Category } from './category/category.model';
 import { ProductImage } from './products/products-images/products-images.model';
 import { ProductExample } from './products/products-examples/products-examples.model';
+import { ProductVideo } from './products/products-videos/products-videos.model';
 
 @Module({
   imports: [
@@ -29,11 +30,21 @@ import { ProductExample } from './products/products-examples/products-examples.m
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      models: [User, Role, UserRoles, Product, Category, ProductImage, ProductExample],
+      models: [
+        User,
+        Role,
+        UserRoles,
+        Product,
+        Category,
+        ProductImage,
+        ProductExample,
+        ProductVideo,
+      ],
       autoLoadModels: true,
     }),
     ServeStaticModule.forRoot({
-      rootPath: path.resolve(__dirname, 'static'),
+      rootPath: path.resolve(__dirname, '..', 'dist', 'static'),
+      serveRoot: '',
     }),
     UsersModule,
     RolesModule,

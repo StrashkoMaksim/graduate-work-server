@@ -10,6 +10,7 @@ import {
 import { Category } from '../category/category.model';
 import { ProductImage } from './products-images/products-images.model';
 import { ProductExample } from './products-examples/products-examples.model';
+import { ProductVideo } from './products-videos/products-videos.model';
 
 interface ProductsCreationAttrs {
   slug: string;
@@ -50,10 +51,8 @@ export class Product extends Model<Product, ProductsCreationAttrs> {
   })
   previewImage: string;
 
-  @Column({
-    type: DataType.STRING,
-  })
-  videos: string;
+  @HasMany(() => ProductVideo)
+  videos: ProductVideo[];
 
   @HasMany(() => ProductImage)
   images: ProductImage[];

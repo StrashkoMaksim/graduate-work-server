@@ -11,7 +11,7 @@ export class MulterConfigService implements MulterOptionsFactory {
   createMulterOptions(): MulterModuleOptions {
     return {
       limits: {
-        fileSize: 1024 * 50,
+        fileSize: 1024 * 1024 * 50,
       },
       storage: diskStorage({
         destination: function (req, file, cb) {

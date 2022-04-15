@@ -4,15 +4,15 @@ import {
   ValidationArguments,
 } from 'class-validator';
 
-@ValidatorConstraint({ name: 'isIntNumbers', async: false })
-export class IsIntNumbers implements ValidatorConstraintInterface {
+@ValidatorConstraint({ name: 'IsStrings', async: false })
+export class IsStrings implements ValidatorConstraintInterface {
   validate(array: [any], args: ValidationArguments) {
     if (!(array instanceof Array)) {
       return false;
     }
 
     for (const el of array) {
-      if (typeof el !== 'number' || !Number.isInteger(el)) {
+      if (typeof el !== 'string') {
         return false;
       }
     }
@@ -20,6 +20,6 @@ export class IsIntNumbers implements ValidatorConstraintInterface {
   }
 
   defaultMessage(args: ValidationArguments) {
-    return 'Массив должен содержать целые числа';
+    return 'Массив должен содержать строки';
   }
 }

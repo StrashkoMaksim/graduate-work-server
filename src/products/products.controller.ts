@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, Post, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseInterceptors } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product-dto';
 import { TransactionInterceptor } from '../transaction/transaction.interceptor';

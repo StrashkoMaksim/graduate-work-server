@@ -46,7 +46,7 @@ export class FilesService {
 
   async deleteFile(path: string) {
     fs.unlink(path, (e) => {
-      if (e) console.log(e);
+      if (e) console.error(e);
     });
   }
 
@@ -63,10 +63,11 @@ export class FilesService {
         .flatten(true)
         .flatten({ background: { r: 255, g: 255, b: 255 } })
         .resize(width, height)
-        .toFile(`${process.env.STATIC_PATH}\\${resultImageName}`);
+        .toFile(`${process.env.STATIC_PATH}\\images\\${resultImageName}`);
 
       return resultImageName;
     } catch (e) {
+      console.error(e);
       throw new InternalServerErrorException('Непредвиденная ошибка сервера');
     }
   }

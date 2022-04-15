@@ -10,6 +10,7 @@ import { TransactionInterceptor } from '../transaction/transaction.interceptor';
 import { Sequelize } from 'sequelize-typescript';
 import { ProductsImagesModule } from './products-images/products-images.module';
 import { ProductsExamplesModule } from './products-examples/products-examples.module';
+import { ProductsVideosModule } from './products-videos/products-videos.module';
 
 @Module({
   controllers: [ProductsController],
@@ -24,6 +25,7 @@ import { ProductsExamplesModule } from './products-examples/products-examples.mo
     FilesModule,
     ProductsImagesModule,
     ProductsExamplesModule,
+    ProductsVideosModule,
   ],
 })
 export class ProductsModule {}

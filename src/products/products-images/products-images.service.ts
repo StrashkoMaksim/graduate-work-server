@@ -48,13 +48,13 @@ export class ProductsImagesService {
 
       // Удаление записанных изображений
       bigImages.forEach((image) => {
-        this.filesService.deleteFile(image);
+        this.filesService.deleteFile(process.env.STATIC_PATH + '\\' + image);
       });
       mediumImages.forEach((image) => {
-        this.filesService.deleteFile(image);
+        this.filesService.deleteFile(process.env.STATIC_PATH + '\\' + image);
       });
       smallImages.forEach((image) => {
-        this.filesService.deleteFile(image);
+        this.filesService.deleteFile(process.env.STATIC_PATH + '\\' + image);
       });
 
       throw new InternalServerErrorException('Непредвиденная ошибка сервера');

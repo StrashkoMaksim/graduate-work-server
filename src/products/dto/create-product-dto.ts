@@ -1,13 +1,13 @@
 import {
-  IsArray,
   IsDefined,
   IsNotEmpty,
   IsNotEmptyObject,
-  IsNumber,
+  IsNumber, IsOptional,
   IsString,
   Validate,
 } from 'class-validator';
 import { IsIntNumbers } from '../../validation/is-int-numbers';
+import { IsStrings } from '../../validation/is-strings';
 
 export class CreateProductDto {
   @IsString({ message: 'Название должно быть строкой' })
@@ -38,13 +38,13 @@ export class CreateProductDto {
   @IsNotEmpty({ message: 'Отсутствует ID превью' })
   readonly previewImage: number;
 
-  @IsDefined({ message: 'Отсутствуют ID изображений' })
-  @IsArray({ message: 'ID изображений должны быть массивом' })
   @Validate(IsIntNumbers)
   images: number[];
 
-  @IsDefined({ message: 'Отсутствуют ID изображений' })
-  @IsArray({ message: 'ID изображений должны быть массивом' })
   @Validate(IsIntNumbers)
   examples: number[];
+
+  @IsOptional()
+  @Validate(IsStrings)
+  videos: string[];
 }

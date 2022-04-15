@@ -14,6 +14,7 @@ import { FilesService } from '../files/files.service';
 import { Transaction } from 'sequelize';
 import { ProductsImagesService } from './products-images/products-images.service';
 import { ProductsExamplesService } from './products-examples/products-examples.service';
+import { ProductsVideosService } from './products-videos/products-videos.service';
 
 @Injectable()
 export class ProductsService {
@@ -23,6 +24,7 @@ export class ProductsService {
     private filesService: FilesService,
     private productImagesService: ProductsImagesService,
     private productExamplesService: ProductsExamplesService,
+    private productVideosService: ProductsVideosService,
   ) {}
 
   async getProducts() {
@@ -71,6 +73,18 @@ export class ProductsService {
         { transaction },
       );
 
+      // Добавление видео
+      const videos = await this.productVideosService.createVideos(
+        product.id,
+        dto.videos,
+        transaction,
+      );
+      await product.$set(
+        'videos',
+        videos.map((el) => el.id),
+      );
+      product.videos = videos;
+
       // Добавление изображений
       const images = await this.productImagesService.createImages(
         product.id,
@@ -95,18 +109,18 @@ export class ProductsService {
       );
       product.examples = examples;
 
-      return product;
+      return { message: 'Товар успешно добавлен' };
     } catch (e) {
       if (previewImage) {
-        this.filesService.deleteFile(previewImage);
-        if (e instanceof HttpException) {
-          throw e;
-        } else {
-          console.error(e);
-          throw new InternalServerErrorException(
-            'Непредвиденная ошибка сервера',
-          );
-        }
+        this.filesService.deleteFile(
+          process.env.STATIC_PATH + '\\' + previewImage,
+        );
+      }
+      if (e instanceof HttpException) {
+        throw e;
+      } else {
+        console.error(e);
+        throw new InternalServerErrorException('Непредвиденная ошибка сервера');
       }
     }
   }
