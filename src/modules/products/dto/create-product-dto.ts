@@ -6,8 +6,8 @@ import {
   IsString,
   Validate,
 } from 'class-validator';
-import { IsIntNumbers } from '../../validation/is-int-numbers';
-import { IsStrings } from '../../validation/is-strings';
+import { IsIntNumbers } from '../../../validation/is-int-numbers';
+import { IsStrings } from '../../../validation/is-strings';
 
 export class CreateProductDto {
   @IsString({ message: 'Название должно быть строкой' })

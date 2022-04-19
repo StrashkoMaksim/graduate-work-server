@@ -6,7 +6,7 @@ import { Category } from '../category/category.model';
 import { Product } from './products.model';
 import { CategoryModule } from '../category/category.module';
 import { FilesModule } from '../files/files.module';
-import { TransactionInterceptor } from '../transaction/transaction.interceptor';
+import { TransactionInterceptor } from '../../transaction/transaction.interceptor';
 import { Sequelize } from 'sequelize-typescript';
 import { ProductsImagesModule } from './products-images/products-images.module';
 import { ProductsExamplesModule } from './products-examples/products-examples.module';
