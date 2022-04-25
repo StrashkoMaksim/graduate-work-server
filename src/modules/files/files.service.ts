@@ -8,6 +8,7 @@ import * as sharp from 'sharp';
 import { InjectModel } from '@nestjs/sequelize';
 import { File } from './files.model';
 import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class FilesService {
@@ -19,6 +20,10 @@ export class FilesService {
       throw new BadRequestException('Некорректный формат изображения');
     }
 
+    return await this.uploadFile(file);
+  }
+
+  async uploadFile(file: Express.Multer.File) {
     try {
       const savedFile = await this.filesRepository.create({
         filename: file.filename,
@@ -70,5 +75,23 @@ export class FilesService {
       console.error(e);
       throw new InternalServerErrorException('Непредвиденная ошибка сервера');
     }
+  }
+
+  async saveFile(filename: string): Promise<string> {
+    const imageNameArr = filename.split('.');
+    const resultImageName = `${uuid.v4()}.${imageNameArr.pop()}`;
+    await fs.link(
+      path.join(process.env.TMP_PATH, filename),
+      path.join(process.env.STATIC_PATH, 'files', resultImageName),
+      (err) => {
+        if (err) {
+          console.error(err);
+          throw new InternalServerErrorException(
+            'Непредвиденная ошибка сервера',
+          );
+        }
+      },
+    );
+    return resultImageName;
   }
 }

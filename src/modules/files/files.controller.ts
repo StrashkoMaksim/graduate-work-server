@@ -16,4 +16,10 @@ export class FilesController {
   uploadImage(@UploadedFile() file: Express.Multer.File) {
     return this.filesService.uploadImage(file);
   }
+
+  @UseInterceptors(FileInterceptor('file'))
+  @Post('/file')
+  uploadFile(@UploadedFile() file: Express.Multer.File) {
+    return this.filesService.uploadFile(file);
+  }
 }

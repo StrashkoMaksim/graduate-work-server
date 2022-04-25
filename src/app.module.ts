@@ -19,6 +19,10 @@ import { ProductExample } from './modules/products/products-examples/products-ex
 import { ProductVideo } from './modules/products/products-videos/products-videos.model';
 import { VideosController } from './modules/videos/videos.controller';
 import { VideosModule } from './modules/videos/videos.module';
+import { BannersModule } from './modules/banners/banners.module';
+import { BannersController } from './modules/banners/banners.controller';
+import { DocumentsCategoriesModule } from './modules/documents-categories/documents-categories.module';
+import { DocumentsModule } from './modules/documents/documents.module';
 
 @Module({
   imports: [
@@ -55,8 +59,11 @@ import { VideosModule } from './modules/videos/videos.module';
     ProductsModule,
     CategoryModule,
     VideosModule,
+    BannersModule,
+    DocumentsCategoriesModule,
+    DocumentsModule,
   ],
-  controllers: [VideosController],
+  controllers: [VideosController, BannersController],
   providers: [],
 })
 export class AppModule {}
