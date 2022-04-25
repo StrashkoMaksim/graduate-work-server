@@ -1,7 +1,7 @@
 import { IsDefined, IsNumber, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class DeleteDocumentDto {
+export class IdDto {
   @IsDefined({ message: 'Отсутствует идентификатор' })
   @Type(() => Number)
   @IsNumber(
