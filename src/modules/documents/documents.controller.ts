@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Param,
-  Post,
-  Put,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Param, Post, Put } from '@nestjs/common';
 import { DocumentsService } from './documents.service';
 import { CreateDocumentWithLinkDto } from './dto/create-document-with-link-dto';
 import { UpdateDocumentWithLinkDto } from './dto/update-document-with-link-dto';
