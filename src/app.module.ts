@@ -24,6 +24,11 @@ import { BannersController } from './modules/banners/banners.controller';
 import { DocumentsCategoriesModule } from './modules/documents-categories/documents-categories.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { ArticlesModule } from './modules/articles/articles.module';
+import { CommentsModule } from './modules/comments/comments.module';
+import { SourcesModule } from './modules/sources/sources.module';
+import { StatusesModule } from './modules/statuses/statuses.module';
+import { OrdersModule } from './modules/orders/orders.module';
+import { OrdersCartsModule } from './modules/orders-carts/orders-carts.module';
 
 @Module({
   imports: [
@@ -64,6 +69,11 @@ import { ArticlesModule } from './modules/articles/articles.module';
     DocumentsCategoriesModule,
     DocumentsModule,
     ArticlesModule,
+    CommentsModule,
+    SourcesModule,
+    StatusesModule,
+    OrdersModule,
+    OrdersCartsModule,
   ],
   controllers: [VideosController, BannersController],
   providers: [],
