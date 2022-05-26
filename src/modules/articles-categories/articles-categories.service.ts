@@ -14,16 +14,17 @@ export class ArticlesCategoriesService {
   ) {}
 
   async getArticlesCategories() {
-    return await this.articlesCategoriesRepository.findAll({
-      include: { all: true },
-    });
+    return await this.articlesCategoriesRepository.findAndCountAll();
   }
 
   async createArticlesCategory(dto: CreateArticlesCategoryDto) {
     const slug = await this.getSlug(dto.name);
 
-    await this.articlesCategoriesRepository.create({ ...dto, slug });
-    return 'Категория статей успешно создана';
+    await this.articlesCategoriesRepository.create({
+      name: dto.name,
+      slug,
+    });
+    return await this.getArticlesCategories();
   }
 
   async updateArticlesCategory(dto: UpdateArticlesCategoryDto, id: IdDto) {
@@ -37,7 +38,7 @@ export class ArticlesCategoriesService {
 
     await category.update({ name: dto.name, slug });
 
-    return 'Категория статей успешно обновлена';
+    return await this.getArticlesCategories();
   }
 
   async deleteArticlesCategory(id: IdDto) {
@@ -45,7 +46,7 @@ export class ArticlesCategoriesService {
     if (category) {
       await category.destroy();
     }
-    return 'Категория статей успешно удалена';
+    return await this.getArticlesCategories();
   }
 
   async getCategoryByPk(id: number) {

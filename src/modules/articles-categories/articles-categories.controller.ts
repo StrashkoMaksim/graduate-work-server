@@ -5,14 +5,15 @@ import {
   Get,
   Param,
   Post,
-  Put,
+  Put, UseGuards,
 } from '@nestjs/common';
 import { ArticlesCategoriesService } from './articles-categories.service';
 import { CreateArticlesCategoryDto } from './dto/create-articles-category-dto';
 import { UpdateArticlesCategoryDto } from './dto/update-articles-category-dto';
 import { IdDto } from '../../validation/id-dto';
+import { JwtAuthGuard } from '../auth/jwt-auth-guard';
 
-@Controller('Articles-categories')
+@Controller('articles-categories')
 export class ArticlesCategoriesController {
   constructor(private articlesCategoriesService: ArticlesCategoriesService) {}
 
@@ -22,11 +23,13 @@ export class ArticlesCategoriesController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   createArticlesCategory(@Body() dto: CreateArticlesCategoryDto) {
     return this.articlesCategoriesService.createArticlesCategory(dto);
   }
 
-  @Put(':id')
+  @Put('/:id')
+  @UseGuards(JwtAuthGuard)
   updateArticlesCategory(
     @Body() dto: UpdateArticlesCategoryDto,
     @Param() id: IdDto,
@@ -34,7 +37,8 @@ export class ArticlesCategoriesController {
     return this.articlesCategoriesService.updateArticlesCategory(dto, id);
   }
 
-  @Delete()
+  @Delete('/:id')
+  @UseGuards(JwtAuthGuard)
   deleteArticlesCategory(@Param() id: IdDto) {
     return this.articlesCategoriesService.deleteArticlesCategory(id);
   }
