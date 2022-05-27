@@ -51,6 +51,6 @@ export class Article extends Model<Article, ArticleCreationAttrs> {
   content: string;
 
   @ForeignKey(() => ArticlesCategory)
-  @Column({ type: DataType.INTEGER })
+  @Column({ type: DataType.INTEGER, onDelete: 'RESTRICT' })
   categoryId: number;
 }

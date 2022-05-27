@@ -1,10 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { ArticlesCategory } from './articles-categories.model';
 import { CreateArticlesCategoryDto } from './dto/create-articles-category-dto';
 import { UpdateArticlesCategoryDto } from './dto/update-articles-category-dto';
 import * as slug from 'slug';
 import { IdDto } from '../../validation/id-dto';
+import { SequenceError } from 'rxjs';
+import { SequelizeScopeError } from 'sequelize';
 
 @Injectable()
 export class ArticlesCategoriesService {
@@ -44,7 +51,21 @@ export class ArticlesCategoriesService {
   async deleteArticlesCategory(id: IdDto) {
     const category = await this.articlesCategoriesRepository.findByPk(id.id);
     if (category) {
-      await category.destroy();
+      try {
+        await category.destroy();
+      } catch (e) {
+        if (
+          e instanceof Error &&
+          e.name === 'SequelizeForeignKeyConstraintError'
+        ) {
+          throw new BadRequestException(
+            'Невозможно удалить категорию, внутри которой находятся статьи',
+          );
+        }
+        throw new InternalServerErrorException(
+          'Непредвиденная ошибка при удалении',
+        );
+      }
     }
     return await this.getArticlesCategories();
   }

@@ -12,6 +12,7 @@ import { IdDto } from '../../validation/id-dto';
 import * as slug from 'slug';
 import { ArticlesCategoriesService } from '../articles-categories/articles-categories.service';
 import { FilesService } from '../files/files.service';
+import { GetArticlesDto } from './dto/get-articles-dto';
 
 @Injectable()
 export class ArticlesService {
@@ -20,6 +21,29 @@ export class ArticlesService {
     private articlesCategoryService: ArticlesCategoriesService,
     private filesService: FilesService,
   ) {}
+
+  async getArticles(dto: GetArticlesDto): Promise<any[]> {
+    const articles = await this.articleRepository.findAll({
+      [dto.category && 'where']: { categoryId: dto.category },
+      limit: dto.limit,
+      offset: dto.offset,
+      attributes: {
+        exclude: ['content', 'updatedAt'],
+      },
+      raw: true,
+    });
+
+    return articles.map((article) => {
+      return {
+        ...article,
+        createdAt: new Date(article.createdAt).toLocaleString('ru', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        }),
+      };
+    });
+  }
 
   async createArticle(dto: CreateArticleDto) {
     const category = await this.articlesCategoryService.getCategoryByPk(
@@ -44,8 +68,10 @@ export class ArticlesService {
           'Время заполнения формы вышло, перезагрузите страницу',
         );
       }
-      previewImage = await this.filesService.saveFile(
+      previewImage = await this.filesService.saveImg(
         previewImageFile.filename,
+        432,
+        242,
       );
 
       const slug = await this.getSlug(dto.name);
