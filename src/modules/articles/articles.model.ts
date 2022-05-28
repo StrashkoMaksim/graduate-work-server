@@ -1,12 +1,13 @@
 import { Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
 import { ArticlesCategory } from '../articles-categories/articles-categories.model';
+import { EditorBlocks } from './editor-blocks';
 
 interface ArticleCreationAttrs {
   name: string;
   slug: string;
   previewImage: string;
   previewText: string;
-  content: string;
+  content: EditorBlocks[];
 }
 
 @Table({ tableName: 'articles' })
@@ -45,10 +46,10 @@ export class Article extends Model<Article, ArticleCreationAttrs> {
   previewText: string;
 
   @Column({
-    type: DataType.TEXT,
+    type: DataType.JSONB,
     allowNull: false,
   })
-  content: string;
+  content: EditorBlocks[];
 
   @ForeignKey(() => ArticlesCategory)
   @Column({ type: DataType.INTEGER, onDelete: 'RESTRICT' })

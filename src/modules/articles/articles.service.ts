@@ -80,7 +80,7 @@ export class ArticlesService {
         ...dto,
         slug,
         previewImage,
-        content: JSON.stringify(dto.content),
+        content: dto.content,
       });
 
       return 'Статья успешно создана';
@@ -110,7 +110,7 @@ export class ArticlesService {
 
       if (dto.content) {
         // TODO: Обновление контентных картинок
-        article.content = JSON.stringify(dto.content);
+        article.content = dto.content;
       }
 
       if (dto.previewText) {

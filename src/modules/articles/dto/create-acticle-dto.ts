@@ -7,6 +7,7 @@ import {
   Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { EditorBlocks } from '../editor-blocks';
 
 export class CreateArticleDto {
   @IsString({ message: 'Название должно быть строкой' })
@@ -27,9 +28,8 @@ export class CreateArticleDto {
   readonly previewText: string;
 
   // TODO: Сделать валидацию контента
-  @IsJSON({ message: 'Контент должен быть в формате JSON' })
   @IsNotEmpty({ message: 'Контент не должен быть пустым' })
-  readonly content: object;
+  readonly content: EditorBlocks[];
 
   @IsDefined({ message: 'Отсутствует идентификатор' })
   @Type(() => Number)
