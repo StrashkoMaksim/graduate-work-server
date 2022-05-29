@@ -13,6 +13,7 @@ import * as slug from 'slug';
 import { ArticlesCategoriesService } from '../articles-categories/articles-categories.service';
 import { FilesService } from '../files/files.service';
 import { GetArticlesDto } from './dto/get-articles-dto';
+import { EditorBlocks } from './editor-blocks';
 
 @Injectable()
 export class ArticlesService {
@@ -21,6 +22,13 @@ export class ArticlesService {
     private articlesCategoryService: ArticlesCategoriesService,
     private filesService: FilesService,
   ) {}
+
+  async getAllSlugs() {
+    const articles = await this.articleRepository.findAll({
+      attributes: ['slug'],
+    });
+    return articles;
+  }
 
   async getArticles(dto: GetArticlesDto): Promise<any[]> {
     const articles = await this.articleRepository.findAll({
@@ -31,6 +39,7 @@ export class ArticlesService {
         exclude: ['content', 'updatedAt'],
       },
       raw: true,
+      order: [['createdAt', 'DESC']],
     });
 
     return articles.map((article) => {
@@ -55,24 +64,31 @@ export class ArticlesService {
     }
 
     let previewImage: string;
-    // TODO: Сделать сохранение контентных картинок
-    let contentImages: string[];
+    const contentImages: string[] = [];
 
     try {
-      const previewImageFile = await this.filesService.getFileById(
-        dto.previewImage,
-      );
+      previewImage = await this.findAndSaveImage(dto.previewImage, 432, 242);
 
-      if (!previewImageFile) {
-        throw new RequestTimeoutException(
-          'Время заполнения формы вышло, перезагрузите страницу',
-        );
+      for (const block of dto.content) {
+        if (block.type === 'image') {
+          const savedImage = await this.findAndSaveImage(
+            block.data.file.name,
+            832,
+          );
+          contentImages.push(savedImage);
+          block.data.file.url = `${process.env.SERVER_PATH}/images/${savedImage}`;
+        } else if (block.type === 'carousel') {
+          for (const image of block.data) {
+            const savedImage = await this.saveImage(
+              image.url.replace(`${process.env.SERVER_PATH}/tmp/`, ''),
+              273,
+              273,
+            );
+            contentImages.push(savedImage);
+            image.url = `${process.env.SERVER_PATH}/images/${savedImage}`;
+          }
+        }
       }
-      previewImage = await this.filesService.saveImg(
-        previewImageFile.filename,
-        432,
-        242,
-      );
 
       const slug = await this.getSlug(dto.name);
 
@@ -88,6 +104,9 @@ export class ArticlesService {
       if (previewImage) {
         this.filesService.deleteFile(previewImage);
       }
+      contentImages.forEach((image) => {
+        this.filesService.deleteFile(image);
+      });
       throw e;
     }
   }
@@ -103,13 +122,35 @@ export class ArticlesService {
     let contentImages: string[];
 
     try {
+      let oldPreviewImage: string;
       if (dto.previewImage) {
-        previewImage = await this.savePreviewImage(dto.previewImage);
+        previewImage = await this.findAndSaveImage(dto.previewImage);
         article.previewImage = previewImage;
       }
 
+      let oldContent: EditorBlocks[];
       if (dto.content) {
-        // TODO: Обновление контентных картинок
+        oldContent = dto.content;
+        for (const block of dto.content) {
+          if (block.type === 'image') {
+            const savedImage = await this.findAndSaveImage(
+              block.data.file.name,
+              832,
+            );
+            contentImages.push(savedImage);
+            block.data.file.url = `${process.env.SERVER_PATH}/images/${savedImage}`;
+          } else if (block.type === 'carousel') {
+            for (const image of block.data) {
+              const savedImage = await this.saveImage(
+                image.url.replace(`${process.env.SERVER_PATH}/tmp/`, ''),
+                273,
+                273,
+              );
+              contentImages.push(savedImage);
+              image.url = `${process.env.SERVER_PATH}/images/${savedImage}`;
+            }
+          }
+        }
         article.content = dto.content;
       }
 
@@ -122,9 +163,21 @@ export class ArticlesService {
       }
 
       await article.save();
+      if (oldPreviewImage) {
+        this.filesService.deleteFile(oldPreviewImage);
+      }
+      if (oldContent) {
+        this.deleteContentImages(oldContent);
+      }
 
-      return 'Статья успешно удалена';
+      return 'Статья успешно отредактирована';
     } catch (e) {
+      if (previewImage) {
+        this.filesService.deleteFile(previewImage);
+      }
+      contentImages.forEach((image) => {
+        this.filesService.deleteFile(image);
+      });
       throw e;
     }
   }
@@ -133,9 +186,10 @@ export class ArticlesService {
     const article = await this.articleRepository.findByPk(articleId.id);
 
     if (article) {
-      // TODO: Удалить контентные картинки
-      this.filesService.deleteFile(article.previewImage);
       await article.destroy();
+
+      this.filesService.deleteFile(article.previewImage);
+      this.deleteContentImages(article.content);
     }
 
     return 'Статья успешно удалена';
@@ -168,24 +222,49 @@ export class ArticlesService {
     return slugStr;
   }
 
-  private async savePreviewImage(imageId: number) {
-    const previewImageFile = await this.filesService.getFileById(imageId);
+  private async deleteContentImages(content: EditorBlocks[]) {
+    content.forEach((block) => {
+      if (block.type === 'image') {
+        this.filesService.deleteFile(
+          block.data.file.replace(`${process.env.SERVER_PATH}/images/`, ''),
+        );
+      } else if (block.type === 'carousel') {
+        block.data.forEach((image) => {
+          this.filesService.deleteFile(
+            image.url.replace(`${process.env.SERVER_PATH}/images/`, ''),
+          );
+        });
+      }
+    });
+  }
 
-    if (!previewImageFile) {
+  private async findAndSaveImage(
+    imageId: number,
+    width: number | null = null,
+    height: number | null = null,
+  ) {
+    const imageFile = await this.filesService.getFileById(imageId);
+
+    if (!imageFile) {
       throw new RequestTimeoutException(
         'Время заполнения формы вышло, перезагрузите страницу',
       );
     }
 
-    if (
-      !previewImageFile.filename.endsWith('.jpg') &&
-      !previewImageFile.filename.endsWith('.png')
-    ) {
+    return await this.saveImage(imageFile.filename, width, height);
+  }
+
+  private async saveImage(
+    filename: string,
+    width: number | null = null,
+    height: number | null = null,
+  ) {
+    if (!filename.endsWith('.jpg') && !filename.endsWith('.png')) {
       throw new BadRequestException(
         'Изображение должно быть в формате JPG или PNG',
       );
     }
 
-    return await this.filesService.saveFile(previewImageFile.filename);
+    return await this.filesService.saveImg(filename, width, height);
   }
 }

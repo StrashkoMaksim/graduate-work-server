@@ -29,7 +29,7 @@ export class CreateArticleDto {
 
   // TODO: Сделать валидацию контента
   @IsNotEmpty({ message: 'Контент не должен быть пустым' })
-  readonly content: EditorBlocks[];
+  content: EditorBlocks[];
 
   @IsDefined({ message: 'Отсутствует идентификатор' })
   @Type(() => Number)
