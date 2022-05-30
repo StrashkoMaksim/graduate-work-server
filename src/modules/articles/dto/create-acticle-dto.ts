@@ -1,6 +1,5 @@
 import {
   IsDefined,
-  IsJSON,
   IsNotEmpty,
   IsNumber,
   IsString,

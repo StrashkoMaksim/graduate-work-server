@@ -119,7 +119,7 @@ export class ArticlesService {
     }
 
     let previewImage: string;
-    let contentImages: string[];
+    const contentImages: string[] = [];
 
     try {
       let oldPreviewImage: string;
@@ -128,26 +128,63 @@ export class ArticlesService {
         article.previewImage = previewImage;
       }
 
-      let oldContent: EditorBlocks[];
+      const oldContentImages: Set<string> = new Set();
       if (dto.content) {
-        oldContent = dto.content;
-        for (const block of dto.content) {
+        // Поиск старых картинок в старом контенте
+        const oldContent = article.content;
+        for (const block of oldContent) {
           if (block.type === 'image') {
-            const savedImage = await this.findAndSaveImage(
-              block.data.file.name,
-              832,
+            oldContentImages.add(
+              block.data.file.url.replace(
+                `${process.env.SERVER_PATH}/images/`,
+                '',
+              ),
             );
-            contentImages.push(savedImage);
-            block.data.file.url = `${process.env.SERVER_PATH}/images/${savedImage}`;
           } else if (block.type === 'carousel') {
             for (const image of block.data) {
-              const savedImage = await this.saveImage(
-                image.url.replace(`${process.env.SERVER_PATH}/tmp/`, ''),
-                273,
-                273,
+              oldContentImages.add(
+                image.url.replace(`${process.env.SERVER_PATH}/images/`, ''),
+              );
+            }
+          }
+        }
+
+        for (const block of dto.content) {
+          if (block.type === 'image') {
+            if (
+              !block.data.file.url.startsWith(
+                `${process.env.SERVER_PATH}/images/`,
+              )
+            ) {
+              const savedImage = await this.findAndSaveImage(
+                block.data.file.name,
+                832,
               );
               contentImages.push(savedImage);
-              image.url = `${process.env.SERVER_PATH}/images/${savedImage}`;
+              block.data.file.url = `${process.env.SERVER_PATH}/images/${savedImage}`;
+            } else {
+              oldContentImages.delete(
+                block.data.file.url.replace(
+                  `${process.env.SERVER_PATH}/images/`,
+                  '',
+                ),
+              );
+            }
+          } else if (block.type === 'carousel') {
+            for (const image of block.data) {
+              if (!image.url.startsWith(`${process.env.SERVER_PATH}/images/`)) {
+                const savedImage = await this.saveImage(
+                  image.url.replace(`${process.env.SERVER_PATH}/tmp/`, ''),
+                  273,
+                  273,
+                );
+                contentImages.push(savedImage);
+                image.url = `${process.env.SERVER_PATH}/images/${savedImage}`;
+              } else {
+                oldContentImages.delete(
+                  image.url.replace(`${process.env.SERVER_PATH}/images/`, ''),
+                );
+              }
             }
           }
         }
@@ -159,16 +196,25 @@ export class ArticlesService {
       }
 
       if (dto.name) {
+        article.name = dto.name;
         article.slug = await this.getSlug(dto.name);
+      }
+
+      if (dto.categoryId) {
+        article.categoryId = dto.categoryId;
       }
 
       await article.save();
       if (oldPreviewImage) {
-        this.filesService.deleteFile(oldPreviewImage);
+        this.filesService.deleteFile(
+          `${process.env.STATIC_PATH}/images/${oldPreviewImage}`,
+        );
       }
-      if (oldContent) {
-        this.deleteContentImages(oldContent);
-      }
+      oldContentImages.forEach((image) =>
+        this.filesService.deleteFile(
+          `${process.env.STATIC_PATH}/images/${image}`,
+        ),
+      );
 
       return 'Статья успешно отредактирована';
     } catch (e) {
