@@ -5,6 +5,8 @@ import { CategoryCharacteristics } from './category-characteristics.interface';
 interface CategoryCreationAttrs {
   slug: string;
   name: string;
+  characteristics: CategoryCharacteristics;
+  isMain: boolean;
 }
 
 @Table({ tableName: 'categories' })
@@ -32,6 +34,9 @@ export class Category extends Model<Category, CategoryCreationAttrs> {
     type: DataType.JSONB,
   })
   characteristics: CategoryCharacteristics;
+
+  @Column({ type: DataType.BOOLEAN })
+  isMain: boolean;
 
   @HasMany(() => Product)
   products: Product[];

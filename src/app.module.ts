@@ -55,7 +55,7 @@ import { OrdersCartsModule } from './modules/orders-carts/orders-carts.module';
       autoLoadModels: true,
     }),
     ServeStaticModule.forRoot({
-      rootPath: path.resolve(__dirname, '..', 'dist', 'static'),
+      rootPath: path.resolve(__dirname, '..', 'static'),
       serveRoot: '',
     }),
     UsersModule,

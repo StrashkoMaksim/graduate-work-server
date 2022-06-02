@@ -69,7 +69,7 @@ export class Product extends Model<Product, ProductsCreationAttrs> {
   characteristics: ProductCharacteristic;
 
   @ForeignKey(() => Category)
-  @Column({ type: DataType.INTEGER })
+  @Column({ type: DataType.INTEGER, onDelete: 'RESTRICT' })
   categoryId: number;
 
   @BelongsTo(() => Category)

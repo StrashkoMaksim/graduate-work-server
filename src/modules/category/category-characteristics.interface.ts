@@ -1,5 +1,8 @@
 export interface CategoryCharacteristics {
-  [key: string]: CategoryCharacteristicsType;
+  [key: string]: {
+    type: CategoryCharacteristicsType;
+    isMain: boolean;
+  };
 }
 
 export enum CategoryCharacteristicsType {

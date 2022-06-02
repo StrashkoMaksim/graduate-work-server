@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsDefined,
   IsNotEmpty,
   IsNotEmptyObject,
@@ -18,4 +19,10 @@ export class CreateCategoryDto {
   @IsNotEmptyObject({}, { message: 'Характеристики не должны быть пустыми' })
   @ValidateCategoryCharacteristics()
   readonly characteristics: CategoryCharacteristics;
+
+  @IsBoolean({
+    message:
+      'Параметр видимости характеристики в карточке должен быть логического типа',
+  })
+  readonly isMain: boolean;
 }

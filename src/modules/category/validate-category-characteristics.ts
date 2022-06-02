@@ -3,7 +3,10 @@ import {
   ValidationArguments,
   ValidationOptions,
 } from 'class-validator';
-import { CategoryCharacteristicsType } from './category-characteristics.interface';
+import {
+  CategoryCharacteristics,
+  CategoryCharacteristicsType,
+} from './category-characteristics.interface';
 
 export function ValidateCategoryCharacteristics(
   validationOptions?: ValidationOptions,
@@ -17,7 +20,7 @@ export function ValidateCategoryCharacteristics(
       constraints: [],
       options: validationOptions,
       validator: {
-        validate(object: any, args: ValidationArguments) {
+        validate(object: CategoryCharacteristics, args: ValidationArguments) {
           args.value;
 
           if (object === undefined) {
@@ -26,10 +29,10 @@ export function ValidateCategoryCharacteristics(
 
           for (const field of Object.entries(object)) {
             const isGoodValue =
-              field[1] === CategoryCharacteristicsType.String ||
-              field[1] === CategoryCharacteristicsType.Integer ||
-              field[1] === CategoryCharacteristicsType.Double ||
-              field[1] === CategoryCharacteristicsType.Boolean;
+              field[1].type === CategoryCharacteristicsType.String ||
+              field[1].type === CategoryCharacteristicsType.Integer ||
+              field[1].type === CategoryCharacteristicsType.Double ||
+              field[1].type === CategoryCharacteristicsType.Boolean;
 
             if (typeof field[0] !== 'string' || !isGoodValue) {
               return false;
