@@ -15,10 +15,12 @@ import { ProductVideo } from './products-videos/products-videos.model';
 interface ProductsCreationAttrs {
   slug: string;
   name: string;
+  description: string;
   price: number;
   categoryId: number;
   characteristics: ProductCharacteristic;
   previewImage: string;
+  equipments: string[];
 }
 
 export interface ProductCharacteristic {
@@ -43,13 +45,27 @@ export class Product extends Model<Product, ProductsCreationAttrs> {
 
   @Column({
     type: DataType.STRING,
+    allowNull: false,
   })
   name: string;
 
   @Column({
     type: DataType.STRING,
+    allowNull: false,
+  })
+  description: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
   })
   previewImage: string;
+
+  @Column({
+    type: DataType.JSONB,
+    allowNull: false,
+  })
+  equipments: string[];
 
   @HasMany(() => ProductVideo)
   videos: ProductVideo[];
@@ -62,14 +78,15 @@ export class Product extends Model<Product, ProductsCreationAttrs> {
 
   @Column({
     type: DataType.DOUBLE,
+    allowNull: false,
   })
   price: number;
 
-  @Column({ type: DataType.JSONB })
+  @Column({ type: DataType.JSONB, allowNull: false, })
   characteristics: ProductCharacteristic;
 
   @ForeignKey(() => Category)
-  @Column({ type: DataType.INTEGER, onDelete: 'RESTRICT' })
+  @Column({ type: DataType.INTEGER, allowNull: false, onDelete: 'RESTRICT' })
   categoryId: number;
 
   @BelongsTo(() => Category)

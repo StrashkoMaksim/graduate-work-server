@@ -15,6 +15,9 @@ import { Transaction } from 'sequelize';
 import { ProductsImagesService } from './products-images/products-images.service';
 import { ProductsExamplesService } from './products-examples/products-examples.service';
 import { ProductsVideosService } from './products-videos/products-videos.service';
+import { GetArticlesDto } from '../articles/dto/get-articles-dto';
+import { GetProductsDto } from './dto/get-products-dto';
+import { Category } from '../category/category.model';
 
 @Injectable()
 export class ProductsService {
@@ -27,8 +30,52 @@ export class ProductsService {
     private productVideosService: ProductsVideosService,
   ) {}
 
-  async getProducts() {
-    return await this.productsRepository.findAll();
+  async getProducts(dto: GetProductsDto): Promise<any[]> {
+    const products = await this.productsRepository.findAll({
+      [dto.category && 'where']: { categoryId: dto.category },
+      limit: dto.limit,
+      offset: dto.offset,
+      attributes: {
+        include: [
+          'id',
+          'name',
+          'price',
+          'previewImage',
+          'categoryId',
+          'createdAt',
+        ],
+      },
+      include: {
+        model: Category,
+        attributes: ['characteristics'],
+      },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+    });
+
+    const resultProducts = products.map((product) => {
+      const characteristics: ProductCharacteristic = {};
+      Object.entries(product.characteristics).forEach((entry, index) => {
+        if (product['category.characteristics'][entry[0]].isMain) {
+          characteristics[entry[0]] = entry[1];
+        }
+      });
+
+      return {
+        ...product,
+        characteristics,
+        'category.characteristics': undefined,
+      };
+    });
+
+    return resultProducts;
+  }
+
+  async getAllSlugs() {
+    const articles = await this.productsRepository.findAll({
+      attributes: ['slug'],
+    });
+    return articles;
   }
 
   async createProducts(dto: CreateProductDto, transaction: Transaction) {
@@ -69,21 +116,25 @@ export class ProductsService {
           categoryId: dto.categoryId,
           characteristics,
           previewImage,
+          description: dto.description,
+          equipments: dto.equipments,
         },
         { transaction },
       );
 
       // Добавление видео
-      const videos = await this.productVideosService.createVideos(
-        product.id,
-        dto.videos,
-        transaction,
-      );
-      await product.$set(
-        'videos',
-        videos.map((el) => el.id),
-      );
-      product.videos = videos;
+      if (dto.videos) {
+        const videos = await this.productVideosService.createVideos(
+          product.id,
+          dto.videos,
+          transaction,
+        );
+        await product.$set(
+          'videos',
+          videos.map((el) => el.id),
+        );
+        product.videos = videos;
+      }
 
       // Добавление изображений
       const images = await this.productImagesService.createImages(
@@ -98,24 +149,27 @@ export class ProductsService {
       product.images = images;
 
       // Добавление примеров работ
-      const examples = await this.productExamplesService.createExamples(
-        product.id,
-        dto.examples,
-        transaction,
-      );
-      await product.$set(
-        'examples',
-        examples.map((el) => el.id),
-      );
-      product.examples = examples;
+      if (dto.examples) {
+        const examples = await this.productExamplesService.createExamples(
+          product.id,
+          dto.examples,
+          transaction,
+        );
+        await product.$set(
+          'examples',
+          examples.map((el) => el.id),
+        );
+        product.examples = examples;
+      }
 
       return { message: 'Товар успешно добавлен' };
     } catch (e) {
       if (previewImage) {
         this.filesService.deleteFile(
-          process.env.STATIC_PATH + '\\' + previewImage,
+          process.env.STATIC_PATH + '\\images\\' + previewImage,
         );
       }
+      // TODO: удалять изображения при ошибке
       if (e instanceof HttpException) {
         throw e;
       } else {
