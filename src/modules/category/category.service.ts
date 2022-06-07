@@ -1,5 +1,5 @@
 import {
-  BadRequestException,
+  BadRequestException, forwardRef, Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -10,16 +10,43 @@ import { Category } from './category.model';
 import * as slug from 'slug';
 import { UpdateCategoryDto } from './dto/update-category-dto';
 import { CategoryCharacteristics } from './category-characteristics.interface';
+import { ProductsService } from '../products/products.service';
 
 @Injectable()
 export class CategoryService {
   constructor(
     @InjectModel(Category) private categoryRepository: typeof Category,
+    @Inject(forwardRef(() => ProductsService))
+    private productsService: ProductsService,
   ) {}
 
   async getCategories() {
     const categories = await this.categoryRepository.findAll();
     return categories;
+  }
+
+  async getMainCategories(): Promise<any[]> {
+    const categories = await this.categoryRepository.findAll({
+      where: {
+        isMain: true,
+      },
+      attributes: {
+        exclude: ['createdAt', 'updatedAt', 'isMain', 'characteristics'],
+      },
+      raw: true,
+    });
+    const categoriesWithProducts: any[] = [];
+    for (const category of categories) {
+      categoriesWithProducts.push({
+        ...category,
+        products: await this.productsService.getProducts({
+          category: category.id,
+          limit: 4,
+          offset: 0,
+        }),
+      });
+    }
+    return categoriesWithProducts;
   }
 
   async createCategory(dto: CreateCategoryDto) {
@@ -143,7 +170,7 @@ export class CategoryService {
     let mainCount = 0;
     Object.entries(characteristics).forEach((entity) => {
       if (entity[1].isMain) mainCount++;
-    })
+    });
     if (mainCount !== 2) {
       throw new BadRequestException('В карточке должно быть 2 характеристики');
     }

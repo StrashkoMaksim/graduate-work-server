@@ -14,6 +14,11 @@ export class CategoryController {
     return this.categoryService.getCategories();
   }
 
+  @Get('/main')
+  getMainCategories() {
+    return this.categoryService.getMainCategories();
+  }
+
   @Get('/:slug')
   getCategoryBySlug(@Param() slug: SlugDto) {
     return this.categoryService.getCategoryBySlug(slug.slug);

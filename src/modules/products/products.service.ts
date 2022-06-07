@@ -1,6 +1,6 @@
 import {
-  BadRequestException,
-  HttpException,
+  BadRequestException, forwardRef,
+  HttpException, Inject,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -23,6 +23,7 @@ import { UpdateProductDto } from './dto/update-product-dto';
 export class ProductsService {
   constructor(
     @InjectModel(Product) private productsRepository: typeof Product,
+    @Inject(forwardRef(() => CategoryService))
     private categoryService: CategoryService,
     private filesService: FilesService,
     private productImagesService: ProductsImagesService,
@@ -72,10 +73,11 @@ export class ProductsService {
   }
 
   async getAllSlugs() {
-    const articles = await this.productsRepository.findAll({
+    const products = await this.productsRepository.findAll({
       attributes: ['slug'],
     });
-    return articles;
+    console.log(products);
+    return products;
   }
 
   async createProducts(dto: CreateProductDto, transaction: Transaction) {
@@ -101,7 +103,7 @@ export class ProductsService {
       );
       const previewImage = await this.filesService.saveImg(
         previewEntity.getDataValue('filename'),
-        400,
+        400, 410
       );
       deleteOnError.push(previewImage);
 
@@ -204,7 +206,7 @@ export class ProductsService {
         );
         const newPreviewImage = await this.filesService.saveImg(
           previewEntity.getDataValue('filename'),
-          400,
+          400, 410
         );
         deleteOnError.push(newPreviewImage);
         product.previewImage = newPreviewImage;
@@ -402,7 +404,7 @@ export class ProductsService {
     return 'Товар успешно удален';
   }
 
-  private async getProductBySlug(slug: string, deep?: boolean) {
+  async getProductBySlug(slug: string, deep?: boolean) {
     const product = await this.productsRepository.findOne({
       where: { slug },
       rejectOnEmpty: false,

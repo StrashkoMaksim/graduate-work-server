@@ -26,14 +26,18 @@ export class ProductsController {
   }
 
   @Get('/slugs')
-  @UseGuards(JwtAuthGuard)
   getAllSlugs() {
     return this.productsService.getAllSlugs();
   }
 
+  @Get('/:slug')
+  getProductBySlug(@Param() slug: SlugDto) {
+    return this.productsService.getProductBySlug(slug.slug, true);
+  }
+
   @Get('/admin/:slug')
   @UseGuards(JwtAuthGuard)
-  getProductBySlug(@Param() slug: SlugDto) {
+  getProductForEditing(@Param() slug: SlugDto) {
     return this.productsService.getProductForEditing(slug.slug);
   }
 

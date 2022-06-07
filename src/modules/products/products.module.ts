@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import {forwardRef, Module} from '@nestjs/common';
 import { ProductsController } from './products.controller';
 import { ProductsService } from './products.service';
 import { SequelizeModule } from '@nestjs/sequelize';
@@ -26,11 +26,12 @@ import { JwtConfigService } from '../JWT/jwt-config.service';
     JwtModule.registerAsync({
       useClass: JwtConfigService,
     }),
-    CategoryModule,
+    forwardRef(() => CategoryModule),
     FilesModule,
     ProductsImagesModule,
     ProductsExamplesModule,
     ProductsVideosModule,
   ],
+  exports: [ProductsService],
 })
 export class ProductsModule {}
