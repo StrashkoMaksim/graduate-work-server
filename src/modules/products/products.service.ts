@@ -17,6 +17,7 @@ import { ProductsExamplesService } from './products-examples/products-examples.s
 import { ProductsVideosService } from './products-videos/products-videos.service';
 import { GetProductsDto } from './dto/get-products-dto';
 import { Category } from '../category/category.model';
+import { UpdateProductDto } from './dto/update-product-dto';
 
 @Injectable()
 export class ProductsService {
@@ -78,8 +79,7 @@ export class ProductsService {
   }
 
   async createProducts(dto: CreateProductDto, transaction: Transaction) {
-    let previewImage = '';
-
+    const deleteOnError: string[] = [];
     try {
       const category = await this.categoryService.getCategoryById(
         dto.categoryId,
@@ -99,10 +99,11 @@ export class ProductsService {
       const previewEntity = await this.filesService.getFileById(
         dto.previewImage,
       );
-      previewImage = await this.filesService.saveImg(
+      const previewImage = await this.filesService.saveImg(
         previewEntity.getDataValue('filename'),
         400,
       );
+      deleteOnError.push(previewImage);
 
       // Уникальное название для URL
       const slugStr = await this.generateSlug(dto.name);
@@ -123,16 +124,11 @@ export class ProductsService {
 
       // Добавление видео
       if (dto.videos) {
-        const videos = await this.productVideosService.createVideos(
+        await this.productVideosService.createVideos(
           product.id,
           dto.videos,
           transaction,
         );
-        await product.$set(
-          'videos',
-          videos.map((el) => el.id),
-        );
-        product.videos = videos;
       }
 
       // Добавление изображений
@@ -141,11 +137,11 @@ export class ProductsService {
         dto.images,
         transaction,
       );
-      await product.$set(
-        'images',
-        images.map((el) => el.id),
-      );
-      product.images = images;
+      images.forEach((image) => {
+        deleteOnError.push(image.bigImage);
+        deleteOnError.push(image.mediumImage);
+        deleteOnError.push(image.smallImage);
+      });
 
       // Добавление примеров работ
       if (dto.examples) {
@@ -154,21 +150,158 @@ export class ProductsService {
           dto.examples,
           transaction,
         );
-        await product.$set(
-          'examples',
-          examples.map((el) => el.id),
-        );
-        product.examples = examples;
+        examples.forEach((image) => {
+          deleteOnError.push(image.bigImage);
+          deleteOnError.push(image.smallImage);
+        });
       }
 
       return { message: 'Товар успешно добавлен' };
     } catch (e) {
-      if (previewImage) {
+      deleteOnError.forEach((image) =>
         this.filesService.deleteFile(
-          process.env.STATIC_PATH + '\\images\\' + previewImage,
+          `${process.env.STATIC_PATH}/images/${image}`,
+        ),
+      );
+      if (e instanceof HttpException) {
+        throw e;
+      } else {
+        console.error(e);
+        throw new InternalServerErrorException('Непредвиденная ошибка сервера');
+      }
+    }
+  }
+
+  async updateProduct(
+    id: number,
+    dto: UpdateProductDto,
+    transaction: Transaction,
+  ) {
+    const deleteOnError: string[] = [];
+
+    try {
+      const imagesForDelete: string[] = [];
+      const product = await this.productsRepository.findByPk(id, {
+        include: ['images', 'examples'],
+      });
+
+      if (dto.name) {
+        product.name = dto.name;
+      }
+
+      if (dto.description) {
+        product.description = dto.description;
+      }
+
+      if (dto.price) {
+        product.price = dto.price;
+      }
+
+      if (dto.previewImage) {
+        imagesForDelete.push(product.previewImage);
+        const previewEntity = await this.filesService.getFileById(
+          dto.previewImage,
+        );
+        const newPreviewImage = await this.filesService.saveImg(
+          previewEntity.getDataValue('filename'),
+          400,
+        );
+        deleteOnError.push(newPreviewImage);
+        product.previewImage = newPreviewImage;
+      }
+
+      if (dto.equipments) {
+        product.equipments = dto.equipments;
+      }
+
+      if (dto.characteristics) {
+        const category = await this.categoryService.getCategoryById(
+          product.categoryId,
+        );
+        const characteristics = this.validateCharacteristics(
+          dto.characteristics,
+          category,
+        );
+        product.characteristics = characteristics;
+      }
+
+      if (dto.deletedImages) {
+        const set = new Set<number>(dto.deletedImages);
+        for (const image of product.images) {
+          if (set.has(image.id)) {
+            imagesForDelete.push(image.bigImage);
+            imagesForDelete.push(image.mediumImage);
+            imagesForDelete.push(image.smallImage);
+            await this.productImagesService.deleteImageById(
+              image.id,
+              transaction,
+            );
+          }
+        }
+      }
+
+      if (dto.deletedExamples) {
+        const set = new Set<number>(dto.deletedExamples);
+        for (const image of product.examples) {
+          if (set.has(image.id)) {
+            imagesForDelete.push(image.bigImage);
+            imagesForDelete.push(image.smallImage);
+            await this.productExamplesService.deleteExampleById(
+              image.id,
+              transaction,
+            );
+          }
+        }
+      }
+
+      if (dto.images) {
+        const images = await this.productImagesService.createImages(
+          product.id,
+          dto.images,
+          transaction,
+        );
+        images.forEach((image) => {
+          deleteOnError.push(image.bigImage);
+          deleteOnError.push(image.mediumImage);
+          deleteOnError.push(image.smallImage);
+        });
+      }
+
+      if (dto.examples) {
+        const examples = await this.productExamplesService.createExamples(
+          product.id,
+          dto.examples,
+          transaction,
+        );
+        examples.forEach((image) => {
+          deleteOnError.push(image.bigImage);
+          deleteOnError.push(image.smallImage);
+        });
+      }
+
+      if (dto.videos) {
+        await this.productVideosService.deleteVideos(product.id, transaction);
+        await this.productVideosService.createVideos(
+          product.id,
+          dto.videos,
+          transaction,
         );
       }
-      // TODO: удалять изображения при ошибке
+
+      await product.save({ transaction });
+
+      imagesForDelete.forEach((image) =>
+        this.filesService.deleteFile(
+          `${process.env.STATIC_PATH}/images/${image}`,
+        ),
+      );
+      return 'Товар успешно изменен';
+    } catch (e) {
+      deleteOnError.forEach((image) =>
+        this.filesService.deleteFile(
+          `${process.env.STATIC_PATH}/images/${image}`,
+        ),
+      );
       if (e instanceof HttpException) {
         throw e;
       } else {
@@ -229,10 +362,16 @@ export class ProductsService {
       isCharacteristicsChanged: false,
       images,
       deletedImages: [],
-      equipments: product.equipments,
+      equipments: {
+        values: product.equipments,
+        isChanged: false,
+      },
       examples,
       deletedExamples: [],
-      videos: product.videos.map((video) => video.url),
+      videos: {
+        values: product.videos.map((video) => video.url),
+        isChanged: false,
+      },
     };
   }
 

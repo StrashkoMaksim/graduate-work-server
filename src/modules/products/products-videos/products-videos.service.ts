@@ -28,4 +28,16 @@ export class ProductsVideosService {
     }
     return result;
   }
+
+  async deleteVideos(
+    productId: number,
+    transaction: Transaction,
+  ): Promise<void> {
+    await this.videosRepository.destroy({
+      where: {
+        productId,
+      },
+      transaction,
+    });
+  }
 }

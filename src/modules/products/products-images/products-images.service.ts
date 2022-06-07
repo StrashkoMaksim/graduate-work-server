@@ -62,4 +62,8 @@ export class ProductsImagesService {
 
     return productImagesResult;
   }
+
+  async deleteImageById(id: number, transaction: Transaction) {
+    await this.imagesRepository.destroy({ where: { id }, transaction });
+  }
 }

@@ -2,7 +2,7 @@ import {
   Body,
   Controller, Delete,
   Get, Param,
-  Post,
+  Post, Put,
   Query,
   Req, UseGuards,
   UseInterceptors,
@@ -14,6 +14,7 @@ import { GetProductsDto } from './dto/get-products-dto';
 import { SlugDto } from '../../validation/slug-dto';
 import { JwtAuthGuard } from '../auth/jwt-auth-guard';
 import { IdDto } from '../../validation/id-dto';
+import { UpdateProductDto } from './dto/update-product-dto';
 
 @Controller('products')
 export class ProductsController {
@@ -41,6 +42,13 @@ export class ProductsController {
   @UseInterceptors(TransactionInterceptor)
   createProduct(@Body() dto: CreateProductDto, @Req() req) {
     return this.productsService.createProducts(dto, req.transaction);
+  }
+
+  @Put('/:id')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(TransactionInterceptor)
+  updateProduct(@Param() id: IdDto, @Body() dto: UpdateProductDto, @Req() req) {
+    return this.productsService.updateProduct(id.id, dto, req.transaction);
   }
 
   @Delete('/:id')

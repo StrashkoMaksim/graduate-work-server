@@ -55,4 +55,8 @@ export class ProductsExamplesService {
 
     return productExamplesResult;
   }
+
+  async deleteExampleById(id: number, transaction: Transaction) {
+    await this.examplesRepository.destroy({ where: { id }, transaction });
+  }
 }
