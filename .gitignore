@@ -3,6 +3,10 @@
 /node_modules
 /static
 
+#inveroment
+.development.env
+.production.env
+
 # Logs
 logs
 *.log
