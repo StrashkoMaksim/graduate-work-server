@@ -11,6 +11,8 @@ import { Sequelize } from 'sequelize-typescript';
 import { ProductsImagesModule } from './products-images/products-images.module';
 import { ProductsExamplesModule } from './products-examples/products-examples.module';
 import { ProductsVideosModule } from './products-videos/products-videos.module';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtConfigService } from '../JWT/jwt-config.service';
 
 @Module({
   controllers: [ProductsController],
@@ -21,6 +23,9 @@ import { ProductsVideosModule } from './products-videos/products-videos.module';
   ],
   imports: [
     SequelizeModule.forFeature([Category, Product]),
+    JwtModule.registerAsync({
+      useClass: JwtConfigService,
+    }),
     CategoryModule,
     FilesModule,
     ProductsImagesModule,

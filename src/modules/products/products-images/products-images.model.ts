@@ -47,7 +47,7 @@ export class ProductImage extends Model<
   bigImage: string;
 
   @ForeignKey(() => Product)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: false, onDelete: 'CASCADE' })
   productId: number;
 
   @BelongsTo(() => Product)

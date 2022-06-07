@@ -15,7 +15,6 @@ import { Transaction } from 'sequelize';
 import { ProductsImagesService } from './products-images/products-images.service';
 import { ProductsExamplesService } from './products-examples/products-examples.service';
 import { ProductsVideosService } from './products-videos/products-videos.service';
-import { GetArticlesDto } from '../articles/dto/get-articles-dto';
 import { GetProductsDto } from './dto/get-products-dto';
 import { Category } from '../category/category.model';
 
@@ -179,12 +178,98 @@ export class ProductsService {
     }
   }
 
-  async getProductBySlug(slug: string) {
-    const category = await this.productsRepository.findOne({
+  async getProductForEditing(slug: string) {
+    const product = await this.getProductBySlug(slug, true);
+    const category = await this.categoryService.getCategoryById(
+      product.categoryId,
+    );
+
+    const characteristics = {};
+    Object.entries(category.characteristics).forEach((entry) => {
+      characteristics[entry[0]] = {
+        value: product.characteristics[entry[0]],
+        type: entry[1].type,
+      };
+    });
+    const images = product.images.map((image) => {
+      return {
+        id: image.id,
+        filename: image.mediumImage,
+      };
+    });
+    const examples = product.examples.map((image) => {
+      return {
+        id: image.id,
+        filename: image.bigImage,
+      };
+    });
+
+    return {
+      id: product.id,
+      name: {
+        value: product.name,
+        isChanged: false,
+      },
+      description: {
+        value: product.description,
+        isChanged: false,
+      },
+      price: {
+        value: String(product.price),
+        isChanged: false,
+      },
+      previewImage: {
+        filename: product.previewImage,
+      },
+      category: {
+        id: product.categoryId,
+        isChanged: false,
+      },
+      characteristics,
+      isCharacteristicsChanged: false,
+      images,
+      deletedImages: [],
+      equipments: product.equipments,
+      examples,
+      deletedExamples: [],
+      videos: product.videos.map((video) => video.url),
+    };
+  }
+
+  async deleteProduct(id: number) {
+    const imagesForDelete: string[] = [];
+    const product = await this.productsRepository.findByPk(id, {
+      include: ['images', 'examples'],
+    });
+
+    imagesForDelete.push(product.previewImage);
+    product.images.forEach((image) => {
+      imagesForDelete.push(image.bigImage);
+      imagesForDelete.push(image.mediumImage);
+      imagesForDelete.push(image.smallImage);
+    });
+    product.examples.forEach((image) => {
+      imagesForDelete.push(image.bigImage);
+      imagesForDelete.push(image.smallImage);
+    });
+
+    await product.destroy();
+
+    imagesForDelete.forEach((image) =>
+      this.filesService.deleteFile(
+        `${process.env.STATIC_PATH}/images/${image}`,
+      ),
+    );
+    return 'Товар успешно удален';
+  }
+
+  private async getProductBySlug(slug: string, deep?: boolean) {
+    const product = await this.productsRepository.findOne({
       where: { slug },
       rejectOnEmpty: false,
+      [deep && 'include']: ['images', 'videos', 'examples'],
     });
-    return category;
+    return product;
   }
 
   private validateCharacteristics(

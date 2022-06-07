@@ -4,6 +4,7 @@ import { BadRequestException } from '@nestjs/common';
 export function validateVideo(video: string): {
   videoId: string;
   source: VideoSource;
+  url: string;
 } {
   if (
     video.search(
@@ -15,6 +16,7 @@ export function validateVideo(video: string): {
     return {
       videoId,
       source: VideoSource.youtube,
+      url: `https://www.youtube.com/embed/${videoId}`,
     };
   }
 
@@ -28,6 +30,7 @@ export function validateVideo(video: string): {
     return {
       videoId,
       source: VideoSource.youtube,
+      url: `https://www.youtube.com/embed/${videoId}`,
     };
   }
 
@@ -41,6 +44,7 @@ export function validateVideo(video: string): {
     return {
       videoId,
       source: VideoSource.youtube,
+      url: `https://www.youtube.com/embed/${videoId}`,
     };
   }
 
@@ -54,6 +58,7 @@ export function validateVideo(video: string): {
     return {
       videoId,
       source: VideoSource.dzen,
+      url: `https://zen.yandex.ru/video/watch/${videoId}`,
     };
   }
 
@@ -67,6 +72,7 @@ export function validateVideo(video: string): {
     return {
       videoId,
       source: VideoSource.rutube,
+      url: `https://rutube.ru/play/embed/${videoId}`
     };
   }
 

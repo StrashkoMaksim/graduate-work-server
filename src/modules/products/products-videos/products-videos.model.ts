@@ -45,8 +45,14 @@ export class ProductVideo extends Model<
   })
   source: VideoSource;
 
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  url: string;
+
   @ForeignKey(() => Product)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: false, onDelete: 'CASCADE' })
   productId: number;
 
   @BelongsTo(() => Product)
