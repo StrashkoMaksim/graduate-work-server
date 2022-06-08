@@ -26,7 +26,7 @@ export class ProductsExamplesService {
         const image = await this.filesService.getFileById(imagesArray[i]);
 
         bigImages.push(await this.filesService.saveImg(image.filename, 1920));
-        smallImages.push(await this.filesService.saveImg(image.filename, 150));
+        smallImages.push(await this.filesService.saveImg(image.filename, 100, 100));
 
         productExamplesResult.push(
           await this.examplesRepository.create(
