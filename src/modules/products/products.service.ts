@@ -408,7 +408,7 @@ export class ProductsService {
     const product = await this.productsRepository.findOne({
       where: { slug },
       rejectOnEmpty: false,
-      [deep && 'include']: ['images', 'videos', 'examples'],
+      [deep && 'include']: ['images', 'videos', 'examples', 'category'],
     });
     return product;
   }
