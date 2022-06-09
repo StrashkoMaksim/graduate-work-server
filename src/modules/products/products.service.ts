@@ -371,7 +371,7 @@ export class ProductsService {
       examples,
       deletedExamples: [],
       videos: {
-        values: product.videos.map((video) => video.url),
+        values: product.videos.map((video) => video.rawUrl),
         isChanged: false,
       },
     };

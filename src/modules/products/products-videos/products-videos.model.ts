@@ -12,6 +12,10 @@ interface ProductsVideosCreationAttrs {
   videoId: string;
   source: string;
   productId: number;
+  title: string;
+  smallPreview: string;
+  mediumPreview: string;
+  rawUrl: string;
 }
 
 export enum VideoSource {
@@ -50,6 +54,30 @@ export class ProductVideo extends Model<
     allowNull: false,
   })
   url: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  rawUrl: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  smallPreview: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  mediumPreview: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  title: string;
 
   @ForeignKey(() => Product)
   @Column({ type: DataType.INTEGER, allowNull: false, onDelete: 'CASCADE' })

@@ -5,10 +5,14 @@ import { validateVideo } from '../../validation/validate-video';
 import { CreateVideoDto } from './dto/create-video-dto';
 import { GetVideosDto } from './dto/get-videos-dto';
 import { DeleteVideoDto } from './dto/delete-video-dto';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class VideosService {
-  constructor(@InjectModel(Video) private videosRepository: typeof Video) {}
+  constructor(
+    @InjectModel(Video) private videosRepository: typeof Video,
+    private httpService: HttpService,
+  ) {}
 
   async getVideos(
     dto: GetVideosDto,
@@ -22,7 +26,7 @@ export class VideosService {
   }
 
   async createVideo(dto: CreateVideoDto): Promise<string> {
-    const video = validateVideo(dto.link);
+    const video = validateVideo(dto.link, this.httpService);
     await this.videosRepository.create({ ...video, title: dto.title });
     return 'Видео успешно добавлено';
   }

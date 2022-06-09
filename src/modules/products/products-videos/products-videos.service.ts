@@ -3,11 +3,13 @@ import { InjectModel } from '@nestjs/sequelize';
 import { ProductVideo } from './products-videos.model';
 import { Transaction } from 'sequelize';
 import { validateVideo } from 'src/validation/validate-video';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class ProductsVideosService {
   constructor(
     @InjectModel(ProductVideo) private videosRepository: typeof ProductVideo,
+    private httpService: HttpService,
   ) {}
 
   async createVideos(
@@ -18,7 +20,7 @@ export class ProductsVideosService {
     const result: ProductVideo[] = [];
 
     for (const link of videosArray) {
-      const video = validateVideo(link);
+      const video = await validateVideo(link, this.httpService);
       result.push(
         await this.videosRepository.create(
           { ...video, productId },
