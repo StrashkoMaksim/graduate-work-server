@@ -1,10 +1,14 @@
 import {
   Body,
-  Controller, Delete,
-  Get, Param,
-  Post, Put,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
   Query,
-  Req, UseGuards,
+  Req,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
@@ -15,6 +19,7 @@ import { SlugDto } from '../../validation/slug-dto';
 import { JwtAuthGuard } from '../auth/jwt-auth-guard';
 import { IdDto } from '../../validation/id-dto';
 import { UpdateProductDto } from './dto/update-product-dto';
+import { GetCartDto } from './dto/get-cart-dto';
 
 @Controller('products')
 export class ProductsController {
@@ -28,6 +33,11 @@ export class ProductsController {
   @Get('/slugs')
   getAllSlugs() {
     return this.productsService.getAllSlugs();
+  }
+
+  @Get('/cart')
+  getProductsForCart(@Query() dto: GetCartDto) {
+    return this.productsService.getProductsForCart(dto);
   }
 
   @Get('/:slug')

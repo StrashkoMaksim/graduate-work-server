@@ -1,6 +1,8 @@
 import {
-  BadRequestException, forwardRef,
-  HttpException, Inject,
+  BadRequestException,
+  forwardRef,
+  HttpException,
+  Inject,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -18,6 +20,7 @@ import { ProductsVideosService } from './products-videos/products-videos.service
 import { GetProductsDto } from './dto/get-products-dto';
 import { Category } from '../category/category.model';
 import { UpdateProductDto } from './dto/update-product-dto';
+import { GetCartDto } from './dto/get-cart-dto';
 
 @Injectable()
 export class ProductsService {
@@ -103,7 +106,8 @@ export class ProductsService {
       );
       const previewImage = await this.filesService.saveImg(
         previewEntity.getDataValue('filename'),
-        400, 410
+        400,
+        410,
       );
       deleteOnError.push(previewImage);
 
@@ -206,7 +210,8 @@ export class ProductsService {
         );
         const newPreviewImage = await this.filesService.saveImg(
           previewEntity.getDataValue('filename'),
-          400, 410
+          400,
+          410,
         );
         deleteOnError.push(newPreviewImage);
         product.previewImage = newPreviewImage;
@@ -402,6 +407,16 @@ export class ProductsService {
       ),
     );
     return 'Товар успешно удален';
+  }
+
+  async getProductsForCart(dto: GetCartDto) {
+    const products = await this.productsRepository.findAll({
+      where: {
+        id: dto.ids,
+      },
+      attributes: ['id', 'name', 'previewImage', 'price'],
+    });
+    return products;
   }
 
   async getProductBySlug(slug: string, deep?: boolean) {
