@@ -64,11 +64,11 @@ export class FilesService {
       const imageNameArr = imageName.split('.');
       const resultImageName = `${uuid.v4()}.${imageNameArr.pop()}`;
 
-      await sharp(`${process.env.TMP_PATH}\\${imageName}`)
+      await sharp(path.join(process.env.TMP_PATH, imageName))
         .flatten(true)
         .flatten({ background: { r: 255, g: 255, b: 255 } })
         .resize(width, height)
-        .toFile(`${process.env.STATIC_PATH}\\images\\${resultImageName}`);
+        .toFile(path.join(process.env.STATIC_PATH, 'images', resultImageName));
 
       return resultImageName;
     } catch (e) {
