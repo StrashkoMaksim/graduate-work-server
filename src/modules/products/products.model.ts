@@ -50,7 +50,7 @@ export class Product extends Model<Product, ProductsCreationAttrs> {
   name: string;
 
   @Column({
-    type: DataType.STRING,
+    type: DataType.TEXT,
     allowNull: false,
   })
   description: string;
