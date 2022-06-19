@@ -66,7 +66,13 @@ export class FilesService {
 
       await sharp(path.join(process.env.TMP_PATH, imageName))
         .flatten(true)
-        .flatten({ background: { r: 255, g: 255, b: 255 } })
+        .flatten({
+          background: {
+            r: 243,
+            g: 245,
+            b: 247,
+          },
+        })
         .resize(width, height)
         .toFile(path.join(process.env.STATIC_PATH, 'images', resultImageName));
 
