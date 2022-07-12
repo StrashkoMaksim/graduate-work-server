@@ -2,6 +2,10 @@ import { IsDefined, IsNumber, IsString, IsUrl, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateBannerDto {
+  @IsDefined({ message: 'Отсутствует название' })
+  @IsString({ message: 'Название должно быть строкой' })
+  readonly name: string;
+
   @IsDefined({ message: 'Отсутствует идентификатор' })
   @Type(() => Number)
   @IsNumber(

@@ -1,6 +1,7 @@
 import { Column, DataType, Model, Table } from 'sequelize-typescript';
 
 interface BannersCreationAttrs {
+  name: string;
   bigImage: string;
   mediumImage: string;
   smallImage: string;
@@ -16,6 +17,12 @@ export class Banner extends Model<Banner, BannersCreationAttrs> {
     primaryKey: true,
   })
   id: number;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  name: string;
 
   @Column({
     type: DataType.STRING,
