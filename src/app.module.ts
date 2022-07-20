@@ -29,6 +29,8 @@ import { SourcesModule } from './modules/sources/sources.module';
 import { StatusesModule } from './modules/statuses/statuses.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { OrdersCartsModule } from './modules/orders-carts/orders-carts.module';
+import { ServicesModule } from './modules/services/services.module';
+import { ReviewsModule } from './modules/reviews/reviews.module';
 
 @Module({
   imports: [
@@ -74,6 +76,8 @@ import { OrdersCartsModule } from './modules/orders-carts/orders-carts.module';
     StatusesModule,
     OrdersModule,
     OrdersCartsModule,
+    ServicesModule,
+    ReviewsModule,
   ],
   controllers: [VideosController, BannersController],
   providers: [],
