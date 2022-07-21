@@ -4,7 +4,7 @@ interface SourceCreationAttrs {
   name: string;
 }
 
-@Table({ tableName: 'comments' })
+@Table({ tableName: 'sources' })
 export class Source extends Model<Source, SourceCreationAttrs> {
   @Column({
     type: DataType.INTEGER,
@@ -20,4 +20,11 @@ export class Source extends Model<Source, SourceCreationAttrs> {
     unique: true,
   })
   name: string;
+
+  @Column({
+    type: DataType.BOOLEAN,
+    allowNull: false,
+    defaultValue: true,
+  })
+  isDeletable: boolean;
 }

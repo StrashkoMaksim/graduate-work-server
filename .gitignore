@@ -4,8 +4,10 @@
 /static
 
 #inveroment
-.development.env
-.production.env
+.env.development
+.env.production
+.env.development.local
+.env.production.local
 
 # Logs
 logs

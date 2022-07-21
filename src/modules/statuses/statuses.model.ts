@@ -2,6 +2,7 @@ import { Column, DataType, Model, Table } from 'sequelize-typescript';
 
 interface StatusCreationAttrs {
   name: string;
+  color: string;
 }
 
 @Table({ tableName: 'statuses' })
@@ -20,4 +21,11 @@ export class Status extends Model<Status, StatusCreationAttrs> {
     unique: true,
   })
   name: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+    unique: true,
+  })
+  color: string;
 }
