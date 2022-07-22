@@ -8,5 +8,6 @@ import { Source } from './sources.model';
   controllers: [SourcesController],
   providers: [SourcesService],
   imports: [SequelizeModule.forFeature([Source])],
+  exports: [SourcesService],
 })
 export class SourcesModule {}

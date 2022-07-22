@@ -1,4 +1,5 @@
 import { Column, DataType, Model, Table } from 'sequelize-typescript';
+import { Order } from '../orders/orders.model';
 
 interface SourceCreationAttrs {
   name: string;

@@ -42,4 +42,8 @@ export class SourcesService {
 
     return 'Источник успешно удален';
   }
+
+  async findByPk(id: number) {
+    return await this.sourceRepository.findByPk(id);
+  }
 }

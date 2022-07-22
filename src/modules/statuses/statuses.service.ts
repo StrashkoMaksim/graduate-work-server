@@ -42,4 +42,8 @@ export class StatusesService {
 
     return 'Статус успешно удален';
   }
+
+  async findByPk(id: number) {
+    return await this.statusesRepository.findByPk(id);
+  }
 }

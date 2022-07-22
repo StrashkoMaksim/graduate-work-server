@@ -28,9 +28,9 @@ import { CommentsModule } from './modules/comments/comments.module';
 import { SourcesModule } from './modules/sources/sources.module';
 import { StatusesModule } from './modules/statuses/statuses.module';
 import { OrdersModule } from './modules/orders/orders.module';
-import { OrdersCartsModule } from './modules/orders-carts/orders-carts.module';
 import { ServicesModule } from './modules/services/services.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
+import { Source } from './modules/sources/sources.model';
 
 @Module({
   imports: [
@@ -56,6 +56,7 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
         ProductImage,
         ProductExample,
         ProductVideo,
+        Source,
       ],
       autoLoadModels: true,
     }),
@@ -78,7 +79,6 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
     SourcesModule,
     StatusesModule,
     OrdersModule,
-    OrdersCartsModule,
     ServicesModule,
     ReviewsModule,
   ],

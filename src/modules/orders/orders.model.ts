@@ -1,12 +1,24 @@
-import { Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  HasMany,
+  Model,
+  Table,
+} from 'sequelize-typescript';
 import { Status } from '../statuses/statuses.model';
-import { User } from '../users/users.model';
 import { Source } from '../sources/sources.model';
+import { Comment } from '../comments/comments.model';
+import { OrderCartItem } from './dto/order-cart-item';
 
 interface OrderCreationAttrs {
-  userID: number;
-  statusID: number;
-  sourceID: number;
+  fio: string;
+  phone: string;
+  priceSum: number;
+  cart: OrderCartItem[];
+  statusId: number;
+  sourceId: number;
 }
 
 @Table({ tableName: 'orders' })
@@ -19,15 +31,44 @@ export class Order extends Model<Order, OrderCreationAttrs> {
   })
   id: number;
 
-  @ForeignKey(() => User)
-  @Column({ type: DataType.INTEGER })
-  userID: number;
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  fio: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  phone: string;
+
+  @Column({
+    type: DataType.DOUBLE,
+    allowNull: false,
+  })
+  priceSum: number;
+
+  @Column({
+    type: DataType.JSONB,
+    allowNull: false,
+  })
+  cart: OrderCartItem[];
 
   @ForeignKey(() => Status)
   @Column({ type: DataType.INTEGER })
-  statusID: number;
+  statusId: number;
 
   @ForeignKey(() => Source)
   @Column({ type: DataType.INTEGER })
-  sourceID: number;
+  sourceId: number;
+
+  @BelongsTo(() => Source)
+  source: Source;
+
+  @BelongsTo(() => Status)
+  status: Status;
+
+  @HasMany(() => Comment)
+  comments: Comment[];
 }

@@ -8,5 +8,6 @@ import { Status } from './statuses.model';
   controllers: [StatusesController],
   providers: [StatusesService],
   imports: [SequelizeModule.forFeature([Status])],
+  exports: [StatusesService],
 })
 export class StatusesModule {}

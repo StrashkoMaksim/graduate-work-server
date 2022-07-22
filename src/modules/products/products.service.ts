@@ -79,7 +79,6 @@ export class ProductsService {
     const products = await this.productsRepository.findAll({
       attributes: ['slug'],
     });
-    console.log(products);
     return products;
   }
 
