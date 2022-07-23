@@ -13,6 +13,10 @@ export class DocumentsCategoriesService {
   ) {}
 
   async getDocumentsCategories() {
+    return await this.documentsCategoriesRepository.findAll();
+  }
+
+  async getDocumentsCategoriesWithDocuments() {
     return await this.documentsCategoriesRepository.findAll({
       include: { all: true },
     });

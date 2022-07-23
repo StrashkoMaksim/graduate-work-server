@@ -21,6 +21,11 @@ export class DocumentsCategoriesController {
     return this.documentsCategoriesService.getDocumentsCategories();
   }
 
+  @Get('/with-documents')
+  getDocumentsCategoriesWithDocuments() {
+    return this.documentsCategoriesService.getDocumentsCategoriesWithDocuments();
+  }
+
   @Post()
   createDocumentsCategory(@Body() dto: CreateDocumentsCategoryDto) {
     return this.documentsCategoriesService.createDocumentsCategory(dto);
