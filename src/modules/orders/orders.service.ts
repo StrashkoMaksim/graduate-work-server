@@ -8,6 +8,9 @@ import { StatusesService } from '../statuses/statuses.service';
 import { GetOrdersDto } from './dto/get-orders-dto';
 import { Status } from '../statuses/statuses.model';
 import { Source } from '../sources/sources.model';
+import { CreateOrderFromCartDto } from './dto/create-order-from-cart-dto';
+import { ProductsService } from '../products/products.service';
+import { OrderCartItem } from './dto/order-cart-item';
 
 @Injectable()
 export class OrdersService {
@@ -15,6 +18,7 @@ export class OrdersService {
     @InjectModel(Order) private ordersRepository: typeof Order,
     private sourcesService: SourcesService,
     private statusesService: StatusesService,
+    private productsService: ProductsService,
   ) {}
 
   async getOrders(dto: GetOrdersDto): Promise<any> {
@@ -84,6 +88,39 @@ export class OrdersService {
         priceSum,
         cart: dto.cart || [],
       });
+
+      return 'Заказ успешно добавлен';
+    } catch (e) {
+      exceptionCatcher(e);
+    }
+  }
+
+  async createOrderFromCart(dto: CreateOrderFromCartDto) {
+    try {
+      const productsIds = Object.keys(dto.cart).map((id) => Number(id));
+      const products = await this.productsService.getProductsForCart({
+        ids: productsIds,
+      });
+
+      const cart: OrderCartItem[] = [];
+
+      products.forEach((item) => {
+        cart.push({
+          name: item.name,
+          price: item.price,
+          count: dto.cart[item.id],
+        });
+      });
+
+      const createOrderDto: CreateOrderDto = {
+        fio: dto.fio,
+        phone: dto.phone,
+        sourceId: dto.sourceId,
+        statusId: dto.statusId,
+        cart,
+      };
+
+      await this.createOrder(createOrderDto);
 
       return 'Заказ успешно добавлен';
     } catch (e) {

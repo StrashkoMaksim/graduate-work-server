@@ -3,6 +3,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth-guard';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order-dto';
 import { GetOrdersDto } from './dto/get-orders-dto';
+import { CreateOrderFromCartDto } from './dto/create-order-from-cart-dto';
 
 @Controller('orders')
 export class OrdersController {
@@ -15,8 +16,12 @@ export class OrdersController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
-  createService(@Body() dto: CreateOrderDto) {
+  createOrder(@Body() dto: CreateOrderDto) {
     return this.ordersService.createOrder(dto);
+  }
+
+  @Post('/cart')
+  createOrderFromCart(@Body() dto: CreateOrderFromCartDto) {
+    return this.ordersService.createOrderFromCart(dto);
   }
 }
