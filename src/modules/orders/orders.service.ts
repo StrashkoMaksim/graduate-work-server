@@ -19,6 +19,7 @@ import { OrderCartItem } from './dto/order-cart-item';
 import { CommentsService } from '../comments/comments.service';
 import { Transaction } from 'sequelize';
 import { Comment } from '../comments/comments.model';
+import { UpdateOrderDto } from './dto/update-order-dto';
 
 @Injectable()
 export class OrdersService {
@@ -80,29 +81,32 @@ export class OrdersService {
       ),
     );
 
-    order.createdAt = new Date(order.createdAt).toLocaleString('ru', {
+    const timeOptions: Intl.DateTimeFormatOptions = {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-    });
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    };
 
-    order.updatedAt = new Date(order.updatedAt).toLocaleString('ru', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+    order.createdAt = new Date(order.createdAt).toLocaleString(
+      'ru',
+      timeOptions,
+    );
+
+    order.updatedAt = new Date(order.updatedAt).toLocaleString(
+      'ru',
+      timeOptions,
+    );
 
     order.comments = order.comments.map((comment) => {
       return {
         ...comment,
-        createdAt: new Date(comment.updatedAt).toLocaleString('ru', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-        }),
+        createdAt: new Date(comment.updatedAt).toLocaleString(
+          'ru',
+          timeOptions,
+        ),
       };
     });
 
@@ -145,7 +149,7 @@ export class OrdersService {
         await this.commentsService.createComment(
           {
             orderId: order.id,
-            text: dto.question,
+            text: `Клиент спросил: ${dto.question}`,
           },
           transaction,
         );
@@ -185,6 +189,40 @@ export class OrdersService {
       await this.createOrder(createOrderDto);
 
       return 'Заказ успешно добавлен';
+    } catch (e) {
+      exceptionCatcher(e);
+    }
+  }
+
+  async updateOrder(id: number, dto: UpdateOrderDto) {
+    try {
+      const order = await this.ordersRepository.findByPk(id);
+      if (!order) {
+        throw new NotFoundException('Указанной заявки не существует');
+      }
+
+      if (dto.fio) {
+        order.fio = dto.fio;
+      }
+
+      if (dto.phone) {
+        order.phone = dto.phone;
+      }
+
+      if (dto.statusId) {
+        order.statusId = dto.statusId;
+      }
+
+      if (dto.sourceId) {
+        order.sourceId = dto.sourceId;
+      }
+
+      if (dto.cart) {
+        order.cart = dto.cart;
+      }
+
+      await order.save();
+      return 'Заявка успешно обновлена';
     } catch (e) {
       exceptionCatcher(e);
     }
