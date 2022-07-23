@@ -38,5 +38,10 @@ export class CreateOrderDto {
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => OrderCartItem)
-  readonly cart: OrderCartItem[];
+  readonly cart?: OrderCartItem[];
+
+  @IsOptional()
+  @IsString({ message: 'Вопрос должен быть строкой' })
+  @IsNotEmpty({ message: 'Вопрос не должен быть пустым' })
+  readonly question?: string;
 }

@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Order } from './orders.model';
 import { CreateOrderDto } from './dto/create-order-dto';
@@ -11,6 +16,9 @@ import { Source } from '../sources/sources.model';
 import { CreateOrderFromCartDto } from './dto/create-order-from-cart-dto';
 import { ProductsService } from '../products/products.service';
 import { OrderCartItem } from './dto/order-cart-item';
+import { CommentsService } from '../comments/comments.service';
+import { Transaction } from 'sequelize';
+import { Comment } from '../comments/comments.model';
 
 @Injectable()
 export class OrdersService {
@@ -19,6 +27,8 @@ export class OrdersService {
     private sourcesService: SourcesService,
     private statusesService: StatusesService,
     private productsService: ProductsService,
+    @Inject(forwardRef(() => CommentsService))
+    private commentsService: CommentsService,
   ) {}
 
   async getOrders(dto: GetOrdersDto): Promise<any> {
@@ -60,7 +70,46 @@ export class OrdersService {
     });
   }
 
-  async createOrder(dto: CreateOrderDto) {
+  async getOrder(id: number): Promise<any> {
+    const order = JSON.parse(
+      JSON.stringify(
+        await this.ordersRepository.findByPk(id, {
+          include: [Status, Source, Comment],
+          order: [[{ model: Comment, as: 'comments' }, 'id', 'DESC']],
+        }),
+      ),
+    );
+
+    order.createdAt = new Date(order.createdAt).toLocaleString('ru', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    order.updatedAt = new Date(order.updatedAt).toLocaleString('ru', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    order.comments = order.comments.map((comment) => {
+      return {
+        ...comment,
+        createdAt: new Date(comment.updatedAt).toLocaleString('ru', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        }),
+      };
+    });
+
+    return order;
+  }
+
+  async createOrder(dto: CreateOrderDto, transaction?: Transaction) {
     try {
       const source = await this.sourcesService.findByPk(dto.sourceId);
       if (!source) {
@@ -80,14 +129,27 @@ export class OrdersService {
         });
       }
 
-      await this.ordersRepository.create({
-        fio: dto.fio,
-        phone: dto.phone,
-        sourceId: dto.sourceId,
-        statusId: dto.statusId,
-        priceSum,
-        cart: dto.cart || [],
-      });
+      const order = await this.ordersRepository.create(
+        {
+          fio: dto.fio,
+          phone: dto.phone,
+          sourceId: dto.sourceId,
+          statusId: dto.statusId,
+          priceSum,
+          cart: dto.cart || [],
+        },
+        { transaction },
+      );
+
+      if (dto.question) {
+        await this.commentsService.createComment(
+          {
+            orderId: order.id,
+            text: dto.question,
+          },
+          transaction,
+        );
+      }
 
       return 'Заказ успешно добавлен';
     } catch (e) {

@@ -1,34 +1,43 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Comment } from './comments.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateCommentDto } from './dto/create-comment-dto';
 import { OrdersService } from '../orders/orders.service';
 import { IdDto } from '../../validation/id-dto';
 import { UpdateCommentDto } from './dto/update-comment-dto';
+import { Transaction } from 'sequelize';
 
 @Injectable()
 export class CommentsService {
   constructor(
     @InjectModel(Comment) private commentsRepository: typeof Comment,
+    @Inject(forwardRef(() => OrdersService))
     private orderService: OrdersService,
   ) {}
 
   async getCommentsForOrder(orderId: IdDto) {
     const orders = await this.commentsRepository.findAll({
-      where: { orderID: orderId.id },
+      where: { orderId: orderId.id },
     });
 
     return orders;
   }
 
-  async createComment(dto: CreateCommentDto) {
-    const order = await this.orderService.findByPk(dto.orderId);
+  async createComment(dto: CreateCommentDto, transaction?: Transaction) {
+    if (!transaction) {
+      const order = await this.orderService.findByPk(dto.orderId);
 
-    if (!order) {
-      throw new NotFoundException('Указанный заказ не найден');
+      if (!order) {
+        throw new NotFoundException('Указанный заказ не найден');
+      }
     }
 
-    await this.commentsRepository.create({ ...dto });
+    await this.commentsRepository.create({ ...dto }, { transaction });
 
     return 'Комментарий успешно добавлен';
   }
