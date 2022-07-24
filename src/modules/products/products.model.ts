@@ -19,6 +19,7 @@ interface ProductsCreationAttrs {
   price: number;
   categoryId: number;
   characteristics: ProductCharacteristic;
+  additionalCharacteristics: [string, string][];
   previewImage: string;
   equipments: string[];
 }
@@ -82,8 +83,11 @@ export class Product extends Model<Product, ProductsCreationAttrs> {
   })
   price: number;
 
-  @Column({ type: DataType.JSONB, allowNull: false, })
+  @Column({ type: DataType.JSONB, allowNull: false })
   characteristics: ProductCharacteristic;
+
+  @Column({ type: DataType.JSONB, allowNull: false })
+  additionalCharacteristics: [string, string][];
 
   @ForeignKey(() => Category)
   @Column({ type: DataType.INTEGER, allowNull: false, onDelete: 'RESTRICT' })

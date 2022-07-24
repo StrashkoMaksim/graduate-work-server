@@ -120,6 +120,7 @@ export class ProductsService {
           slug: slugStr,
           categoryId: dto.categoryId,
           characteristics,
+          additionalCharacteristics: dto.additionalCharacteristics,
           previewImage,
           description: dto.description,
           equipments: dto.equipments,
@@ -229,6 +230,10 @@ export class ProductsService {
           category,
         );
         product.characteristics = characteristics;
+      }
+
+      if (dto.additionalCharacteristics) {
+        product.additionalCharacteristics = dto.additionalCharacteristics;
       }
 
       if (dto.deletedImages) {
@@ -365,6 +370,10 @@ export class ProductsService {
         isChanged: false,
       },
       characteristics,
+      additionalCharacteristics: {
+        value: product.additionalCharacteristics,
+        isChanged: false,
+      },
       isCharacteristicsChanged: false,
       images,
       deletedImages: [],

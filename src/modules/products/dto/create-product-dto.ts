@@ -10,6 +10,7 @@ import {
 } from 'class-validator';
 import { IsIntNumbers } from '../../../validation/is-int-numbers';
 import { IsStrings } from '../../../validation/is-strings';
+import { ProductCharacteristic } from '../products.model';
 
 export class CreateProductDto {
   @IsString({ message: 'Название должно быть строкой' })
@@ -36,6 +37,10 @@ export class CreateProductDto {
   readonly characteristics: {
     [key: string]: string | number | boolean;
   };
+
+  @IsOptional()
+  @IsDefined({ message: 'Характеристики не должны быть пустыми' })
+  readonly additionalCharacteristics: [string, string][];
 
   @IsNumber(
     { maxDecimalPlaces: 0 },
