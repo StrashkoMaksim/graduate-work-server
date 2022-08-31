@@ -1,5 +1,7 @@
 import {
-  BadRequestException, forwardRef, Inject,
+  BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -43,6 +45,7 @@ export class CategoryService {
           category: category.id,
           limit: 4,
           offset: 0,
+          search: undefined,
         }),
       });
     }

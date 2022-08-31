@@ -1,4 +1,4 @@
-import { IsOptional, IsNumber, Min } from 'class-validator';
+import { IsOptional, IsNumber, Min, IsNotEmpty } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class GetArticlesDto {
@@ -28,4 +28,8 @@ export class GetArticlesDto {
   )
   @Min(0, { message: 'ID категории должен быть больше или равен 0' })
   readonly category: number;
+
+  @IsOptional()
+  @IsNotEmpty({ message: 'Строка поиска не должна быть пустой' })
+  readonly search: string;
 }

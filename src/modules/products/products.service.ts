@@ -13,7 +13,7 @@ import * as slug from 'slug';
 import { CategoryService } from '../category/category.service';
 import { CategoryCharacteristicsType } from '../category/category-characteristics.interface';
 import { FilesService } from '../files/files.service';
-import { Transaction } from 'sequelize';
+import { Op, Transaction } from 'sequelize';
 import { ProductsImagesService } from './products-images/products-images.service';
 import { ProductsExamplesService } from './products-examples/products-examples.service';
 import { ProductsVideosService } from './products-videos/products-videos.service';
@@ -35,8 +35,18 @@ export class ProductsService {
   ) {}
 
   async getProducts(dto: GetProductsDto): Promise<any[]> {
+    const where: any = {};
+
+    if (dto.category) {
+      where.categoryId = dto.category;
+    }
+
+    if (dto.search) {
+      where[Op.or] = [{ name: { [Op.like]: `%${dto.search}%` } }];
+    }
+
     const products = await this.productsRepository.findAll({
-      [dto.category && 'where']: { categoryId: dto.category },
+      where,
       limit: dto.limit,
       offset: dto.offset,
       attributes: {

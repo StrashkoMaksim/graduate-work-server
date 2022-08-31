@@ -10,8 +10,6 @@ import { CreateArticlesCategoryDto } from './dto/create-articles-category-dto';
 import { UpdateArticlesCategoryDto } from './dto/update-articles-category-dto';
 import * as slug from 'slug';
 import { IdDto } from '../../validation/id-dto';
-import { SequenceError } from 'rxjs';
-import { SequelizeScopeError } from 'sequelize';
 
 @Injectable()
 export class ArticlesCategoriesService {

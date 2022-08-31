@@ -14,6 +14,7 @@ import { ArticlesCategoriesService } from '../articles-categories/articles-categ
 import { FilesService } from '../files/files.service';
 import { GetArticlesDto } from './dto/get-articles-dto';
 import { EditorBlocks } from './editor-blocks';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class ArticlesService {
@@ -31,8 +32,21 @@ export class ArticlesService {
   }
 
   async getArticles(dto: GetArticlesDto): Promise<any[]> {
+    const where: any = {};
+
+    if (dto.category) {
+      where.categoryId = dto.category;
+    }
+
+    if (dto.search) {
+      where[Op.or] = [
+        { name: { [Op.like]: `%${dto.search}%` } },
+        { previewText: { [Op.like]: `%${dto.search}%` } },
+      ];
+    }
+
     const articles = await this.articleRepository.findAll({
-      [dto.category && 'where']: { categoryId: dto.category },
+      where,
       limit: dto.limit,
       offset: dto.offset,
       attributes: {
